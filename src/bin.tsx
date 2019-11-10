@@ -51,7 +51,7 @@ const App = () => {
             width={20}
             paddingTop={1}
           >
-            <Divider width={20} title={`Steps`} titleColor="cyan" />
+            <Divider width={10} title={`Steps`} titleColor="cyan" />
             <Box flexDirection="row">
               <Step
                 value={1}

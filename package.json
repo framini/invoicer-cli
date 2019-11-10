@@ -28,7 +28,6 @@
     "decimal.js": "^10.2.0",
     "figures": "^3.1.0",
     "ink": "^2.5.0",
-    "ink-box": "^1.0.0",
     "ink-select-input": "^3.1.2",
     "ink-spinner": "^3.0.1",
     "ink-table": "^2.0.1",

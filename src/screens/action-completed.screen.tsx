@@ -1,6 +1,5 @@
 import React from 'react';
 import pluralize from 'pluralize';
-import StyledBox from 'ink-box';
 import { Color, Box, useInput, Text } from 'ink';
 import figures from 'figures';
 
@@ -22,9 +21,12 @@ export const ActionCompleted = ({
 
   if (!actionCompleted) {
     return (
-      <StyledBox>
-        <Color red>{figures.cross}</Color> Seems like something went wrong :/
-      </StyledBox>
+      <Box paddingTop={1} paddingBottom={1}>
+        <Color red>{figures.cross}</Color>{' '}
+        <Text italic bold>
+          Seems like something went wrong :/
+        </Text>
+      </Box>
     );
   }
 
@@ -33,8 +35,7 @@ export const ActionCompleted = ({
   return (
     <React.Fragment>
       <Box paddingTop={1} paddingBottom={1}>
-        <Color green>{figures.tick}</Color>
-        {' '}
+        <Color green>{figures.tick}</Color>{' '}
         <Text italic bold>
           {entityName} created successfully!
         </Text>

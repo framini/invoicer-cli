@@ -31,13 +31,14 @@ export const BaseInfoScreen = ({ info }: { info: any }) => {
   return (
     <>
       <Box paddingTop={1} flexDirection="column">
-        <Text bold><Color magenta>Setup personal details:</Color></Text>
-        <Text italic>
-          We'll start by setting up of your basic info.
+        <Text bold>
+          <Color magenta>Setup personal details:</Color>
         </Text>
+        <Text italic>We'll start by setting up of your basic info.</Text>
         <Text italic>
-          This is a one time only process.
+          This is a one time only process and what we gather here
         </Text>
+        <Text italic>is gonna be used for generating the invoices</Text>
       </Box>
       <Divider padding={0} />
       <Box paddingBottom={1}>
