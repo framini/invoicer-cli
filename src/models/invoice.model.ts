@@ -468,7 +468,18 @@ export const invoiceMachine = Machine<any, any, any>(
           );
         }
 
-        const keys = Object.keys(ctx.formatted).filter(k => ctx.formatted[k]);
+        const keys = Object.keys(ctx.formatted).filter(k => ctx.formatted[k]).filter(k => {
+          const variable = config.app.variables.find(v => v.name === k);
+
+          // This way we make sure we're only validating `required`
+          // variables and any other, whether defined or non required
+          // will be filtered out.
+          if (variable && variable.required) {
+            return true;
+          }
+
+          return false;
+        });
 
         await checkRequiredVariables(config.app.templatePath, keys);
 

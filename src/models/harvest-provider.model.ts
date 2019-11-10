@@ -351,9 +351,15 @@ export const harvestProviderMachine = Machine<any, any, any>(
           };
         });
 
+        // we'll only include `totalHours` for `flat_salary` since for
+        // `hourly_rate` we don't need to fill in that field
+        const totalHoursProp = ctx.typeOfContract === 'flat_salary' ? {
+          totalHours
+        } : {}
+
         return {
+          ...totalHoursProp,
           report: formattedEntries,
-          totalHours,
           hourlyRate,
           flatSalary
         };
