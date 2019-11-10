@@ -1,9 +1,8 @@
 import React from 'react';
-import pluralize from 'pluralize';
 import { Color, Box, useInput, Text } from 'ink';
 import figures from 'figures';
 
-import { capitalize } from '../utils/general';
+import { capitalize, getSingular } from '../utils/general';
 import { Divider } from '../components/divider';
 
 export const ActionCompleted = ({
@@ -30,7 +29,7 @@ export const ActionCompleted = ({
     );
   }
 
-  const entityName = capitalize(pluralize(actionCompleted, 1));
+  const entityName = capitalize(getSingular(actionCompleted));
 
   return (
     <React.Fragment>
