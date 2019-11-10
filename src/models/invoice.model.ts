@@ -3,6 +3,8 @@ import { Machine, assign, sendParent, send } from 'xstate';
 import { subMonths, format, isBefore, setDate, setMonth } from 'date-fns';
 
 import { toXlsx, checkRequiredVariables } from '../utils/xlsx';
+import * as config from '../config';
+import { fileExists } from '../utils/fs';
 
 export const createInvoice = () => {
   return {
@@ -148,8 +150,7 @@ export const createInvoice = () => {
         kind: 'select-input'
       },
       retry_check_dependencies: {
-        label:
-          'Something went wrong while making the math. Feeling lucky and want to retry?',
+        label: 'Missing dependencies. See the error below:',
         errorSrc: 'dependencies_error',
         values: [
           {
@@ -414,31 +415,64 @@ export const invoiceMachine = Machine<any, any, any>(
           ? paymentMethodField.label
           : ctx.payment;
 
+        const supportedVariables = config.app.variables.reduce(
+          (reducer, v) => {
+            reducer[v.name] = undefined;
+
+            return reducer;
+          },
+          {} as Record<string, undefined>
+        );
+
+        // This is a convienent way for deleting unsued variables
+        // within the xlx template since properties with `underfined`
+        // as value will be removed from the template.
+        const formattedData = {
+          ...supportedVariables,
+          ...ctx.providerFormattedData
+        };
+
         return {
-          ...ctx.providerFormattedData,
+          ...formattedData,
           payment_method: paymentMethod,
           month: format(setMonth(new Date(), ctx.date), 'MMMM'),
           year: format(new Date(), 'yyyy')
         };
       },
       generateInvoice: async (ctx: any) => {
-        return await toXlsx(ctx.formatted);
+        // TODO: add support for adding custom file outputs
+        const filename = `invoice-${ctx.formatted.month}-${ctx.baseInfo.firstname}-${ctx.baseInfo.lastname}`.toLocaleUpperCase();
+
+        // we'll re-format `report` to the shape expected by the xlsx
+        // generator. We can't do this before since we need the
+        // original shape to preview the data in previous steps.
+        const data = {
+          ...ctx.formatted,
+          report: ctx.formatted.report.map((item: any) =>
+            Object.keys(item).map(i => item[i])
+          )
+        };
+
+        return await toXlsx({
+          templatePath: config.app.templatePath,
+          filenames: [filename],
+          data
+        });
       },
       checkDependencies: async (ctx: any) => {
-        // TODO: implement this.
-        await new Promise(r =>
-          setTimeout(() => {
-            r();
-          }, 3000)
-        );
+        const templateExists = await fileExists(config.app.templatePath);
+
+        if (!templateExists) {
+          return Promise.reject(
+            'Missing template.xlsx. This file is expected to exist in\nthe Current Working Directory'
+          );
+        }
 
         const keys = Object.keys(ctx.formatted).filter(k => ctx.formatted[k]);
 
-        console.log('________________________', keys, ctx.formatted);
+        await checkRequiredVariables(config.app.templatePath, keys);
 
-        await checkRequiredVariables('./templates/template.xlsx', keys)
-
-        return Promise.reject(ctx.baseInfo.firstname);
+        return Promise.resolve();
       }
     },
     guards: {

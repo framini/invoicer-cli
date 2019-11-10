@@ -177,6 +177,8 @@ export const FormField = <T extends any>({
           items={field.values}
           onSelect={item => onSubmit(item.value as string)}
           initialIndex={initialIndex}
+          indicatorComponent={SelectIndicator}
+          itemComponent={SelectItem}
         />
       </Box>
     );

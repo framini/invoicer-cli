@@ -1,5 +1,4 @@
 import XlsxPopulate from 'xlsx-populate';
-import path from 'path';
 
 export async function checkRequiredVariables(p: string, variables: string[]) {
   return new Promise((resolve, reject) => {
@@ -34,31 +33,46 @@ export async function checkRequiredVariables(p: string, variables: string[]) {
   });
 }
 
-export async function toXlsx(data: any) {
-  // TODO: the route should be dynamic
-  return XlsxPopulate.fromFileAsync(
-    path.join(__dirname, '../../', 'templates', 'template.xlsx')
-  ).then((workbook: any) => {
-    const sheet = workbook.sheet('Invoice');
+const getCellFromVariable = ({
+  sheet,
+  variable
+}: {
+  sheet: any;
+  variable: string;
+}) => {
+  const [cell] = sheet.find(`{{${variable}}}`);
 
-    const report = data.report.map((item: any) =>
-      Object.keys(item).map(i => item[i])
+  if (!cell) {
+    return undefined
+  }
+
+  return `${cell.columnName()}${cell.rowNumber()}`;
+};
+
+export async function toXlsx({ templatePath, data, filenames }: any) {
+  return XlsxPopulate.fromFileAsync(templatePath).then((workbook: any) => {
+    const sheet = workbook.sheet(0);
+
+    let hasSetDate = false;
+
+    Object.keys(data).forEach(variable => {
+      const cell = getCellFromVariable({ sheet, variable });
+
+      if (!cell) return;
+
+      if (variable === 'month' || variable === 'year') {
+        if (!hasSetDate) {
+          sheet.cell(cell).value(`${data.month}, ${data.year}`);
+        }
+      } else {
+        sheet.cell(cell).value(data[variable]);
+      }
+    });
+
+    return Promise.all(
+      filenames.map((filename: string) => {
+        return workbook.toFileAsync(`./${filename}.xlsx`);
+      })
     );
-
-    sheet.cell('B8').value(report);
-
-    sheet.cell('F5').value(data.payment_method);
-
-    sheet.cell('I8').value(`${data.month}, ${data.year}`);
-
-    // Total Salary
-    // TODO: This should be conditional
-    sheet.cell('H11').value(data.flatSalary);
-
-    // Total hours
-    // TODO: This should be conditional
-    sheet.cell('H12').value(data.totalHours);
-
-    return workbook.toFileAsync('./pepe.xlsx');
   });
 }
