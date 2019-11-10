@@ -464,7 +464,7 @@ export const invoiceMachine = Machine<any, any, any>(
 
         if (!templateExists) {
           return Promise.reject(
-            'Missing template.xlsx. This file is expected to exist in\nthe Current Working Directory'
+            'Missing "template.xlsx". This file is expected to exist in\nthe Current Working Directory'
           );
         }
 

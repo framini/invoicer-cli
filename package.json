@@ -1,17 +1,32 @@
 {
   "name": "@framini/invoicer-cli",
+  "description": "Terminal assistant for generating invoices",
   "version": "0.0.1",
+  "author": {
+    "name": "Francisco Ramini",
+    "email": "framini@gmail.com"
+  },
   "main": "dist/bin.js",
   "license": "MIT",
   "bin": {
     "@framini/invoicer-cli": "dist/bin.js",
     "inv": "dist/bin.js"
   },
+  "bugs": {
+    "url": "https://github.com/framini/invoicer-cli/issues"
+  },
   "engines": {
     "node": ">=8.0.0"
   },
+  "homepage": "https://github.com/framini/invoicer-cli",
   "files": [
     "dist"
+  ],
+  "keywords": [
+    "xstate cli",
+    "invoicer",
+    "invoice",
+    "ink"
   ],
   "scripts": {
     "build": "tsc -d",

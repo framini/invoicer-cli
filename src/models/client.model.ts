@@ -78,8 +78,6 @@ export const createClient = (
         columns: [
           { label: 'Name', value: 'name' },
           { label: 'Provider', value: 'provider' },
-          // TODO:
-          // { label: 'Flat Rate', value: 'flat_rate' },
           { label: 'Type of Contract', value: 'typeOfContract' },
           { label: 'Flat Salary', value: 'flatSalary' },
           { label: 'Hourly Rate', value: 'hourlyRate' },
