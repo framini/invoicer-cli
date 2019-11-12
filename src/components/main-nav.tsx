@@ -29,7 +29,7 @@ const MainNavItem = (props: {
   return (
     <Box marginRight={5}>
       <Cursor isActive={isActive} />
-      <Text underline={isActive} bold={isActive}>
+      <Text bold={isActive}>
         {isActive ? <Color cyan>{props.children}</Color> : props.children}
       </Text>
     </Box>

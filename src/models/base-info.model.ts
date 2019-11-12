@@ -34,11 +34,13 @@ const defaultContext: BaseMachineContext = {
   fields: {
     firstname: {
       label: 'First Name',
-      kind: 'input'
+      kind: 'input',
+      value: 'firstname'
     },
     lastname: {
       label: 'Last Name',
-      kind: 'input'
+      kind: 'input',
+      value: 'lastname'
     },
     review: {
       label: 'Review',

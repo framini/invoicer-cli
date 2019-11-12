@@ -160,8 +160,7 @@ export const FormField = <T extends any>({
   context,
   value: propsValue
 }: FormFieldProps<T>) => {
-  // @ts-ignore
-  const [value, setValue] = React.useState(context[field.value] || '');
+  const [value, setValue] = React.useState('');
 
   if (field.kind === 'select-input') {
     const index = field.values.findIndex(item => item.value === propsValue);
