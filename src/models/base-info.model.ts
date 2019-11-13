@@ -13,10 +13,14 @@ interface BaseMachineSchema {
   states: BaseMachineState;
 }
 
-export type BaseMachineEvents = {
-  type: 'BASE_INFO.NEXT';
-  payload: any;
-};
+export type BaseMachineEvents =
+  | {
+      type: 'BASE_INFO.NEXT';
+      payload: any;
+    }
+  | {
+      type: 'BASE_INFO.LOCAL_DISCARD';
+    };
 
 type BaseInfoFormFields = FormFields<
   Pick<BaseMachineState, 'firstname' | 'lastname' | 'review'>
@@ -96,11 +100,23 @@ export const baseInfoMachine = Machine<
       success: {
         type: 'final'
       }
+    },
+    on: {
+      'BASE_INFO.LOCAL_DISCARD': {
+        actions: 'discard'
+      }
     }
   },
-  // // @ts-ignore
   {
     actions: {
+      discard: sendParent(
+        // @ts-ignore
+        (ctx: BaseMachineContext, event: BaseMachineEvents) => {
+          return {
+            type: 'BASE_INFO.DISCARD',
+          };
+        }
+      ),
       updateContextKey: assign((ctx, event: any) => {
         return {
           [event.key]: event.value

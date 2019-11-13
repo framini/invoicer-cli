@@ -6,8 +6,6 @@ import { baseInfoMachine, createBaseInfo } from './base-info.model';
 import { Client } from '../types/types';
 import { db } from '../utils/db';
 
-// db.clear();
-
 type TopLevelRoutesState = {
   initializing: {};
   'base-info': {};
@@ -57,6 +55,7 @@ export type TopLevelRoutesEvent =
   | { type: 'TOP_LEVEL.PROVIDER.CALCULATE_SUCCESS'; payload: any }
   | { type: 'TOP_LEVEL.PROVIDER.CALCULATE_FAILURE'; payload: any }
   | { type: 'BASE_INFO.SAVE'; payload: any }
+  | { type: 'BASE_INFO.DISCARD' }
   | { type: 'TOP_LEVEL.GO_TO'; payload: any };
 
 export const topLevelRoutesMachine = Machine<
@@ -205,9 +204,13 @@ export const topLevelRoutesMachine = Machine<
           cond: 'hasFinishedSetup'
         }
       ],
+      'BASE_INFO.DISCARD': {
+        actions: ['toHome', send('TO_HOME')],
+        target: 'home',
+      },
       'TOP_LEVEL.GO_TO': {
         actions: ['sendNavigateTo', 'trackSelectedRoute']
-      }
+      },
     }
   },
   {

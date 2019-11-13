@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Text } from 'ink';
+import { Box, Text, useInput } from 'ink';
 import { useService } from '@xstate/react';
 
 import { getField, FormField } from '../components/form-field';
@@ -10,10 +10,23 @@ import {
 } from '../models/base-info.model';
 import { Color } from 'ink';
 
-export const BaseInfoScreen = ({ info }: { info: any }) => {
+export const BaseInfoScreen = ({
+  info,
+  isInitialSetup
+}: {
+  info: any;
+  isInitialSetup: boolean;
+}) => {
   const [state, send] = useService<BaseMachineContext, BaseMachineEvents>(
     info.ref
   );
+
+  useInput((input, key) => {
+    if (key.escape && !isInitialSetup) {
+      // @ts-ignore
+      send('BASE_INFO.DISCARD');
+    }
+  });
 
   if (state.value === 'success') {
     return null;
@@ -34,11 +47,15 @@ export const BaseInfoScreen = ({ info }: { info: any }) => {
         <Text bold>
           <Color magenta>Setup personal details:</Color>
         </Text>
-        <Text italic>We'll start by setting up of your basic info.</Text>
-        <Text italic>
-          This is a one time only process and what we gather here
-        </Text>
-        <Text italic>is gonna be used for generating the invoices</Text>
+        {isInitialSetup && (
+          <>
+            <Text italic>We'll start by setting up of your basic info.</Text>
+            <Text italic>
+              This is a one time only process and what we gather here
+            </Text>
+            <Text italic>is gonna be used for generating the invoices</Text>
+          </>
+        )}
       </Box>
       <Divider padding={0} />
       <Box paddingBottom={1}>

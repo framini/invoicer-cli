@@ -41,6 +41,11 @@ const App = () => {
     return !c.name || !c.provider;
   });
 
+  const isInitialSetup =
+    state.context.baseInfo?.firstname &&
+    state.context.baseInfo?.lastname &&
+    noClientsCreated;
+
   return (
     <>
       {!state.context.finishedSetup && (
@@ -56,9 +61,8 @@ const App = () => {
               <Step
                 value={1}
                 condition={
-                  !state.context.baseInfo ||
-                  !state.context.baseInfo.firstname ||
-                  !state.context.baseInfo.lastname
+                  !state.context.baseInfo?.firstname ||
+                  !state.context.baseInfo?.lastname
                 }
               />
               <StepDivider />
@@ -70,7 +74,10 @@ const App = () => {
 
       <Route section="base-info">
         {state.context.baseInfo.ref && (
-          <BaseInfoScreen info={state.context.baseInfo} />
+          <BaseInfoScreen
+            info={state.context.baseInfo}
+            isInitialSetup={isInitialSetup}
+          />
         )}
       </Route>
 
@@ -82,12 +89,7 @@ const App = () => {
         {state.context.activeId && (
           <CreateClientScreen
             client={state.context.clients[state.context.activeId]}
-            isInitialSetup={
-              state.context.baseInfo &&
-              state.context.baseInfo.firstname &&
-              state.context.baseInfo.lastname &&
-              noClientsCreated
-            }
+            isInitialSetup={isInitialSetup}
           />
         )}
       </Route>
