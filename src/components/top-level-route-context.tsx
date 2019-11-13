@@ -22,7 +22,6 @@ export const TopLevelRouteController = ({
       invoices: {},
       menu: [],
       ...dbData,
-      navigated: '',
       selected: 'home',
     })
   );

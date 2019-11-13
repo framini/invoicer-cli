@@ -1,14 +1,14 @@
 import React from 'react';
 import { Box, Text, Color } from 'ink';
 import TextInput from 'ink-text-input';
-import SelectInput, { ItemProps, IndicatorProps } from 'ink-select-input';
 import Table from 'ink-table';
 import Spinner from 'ink-spinner';
 import figures from 'figures';
 
 import { Divider } from './divider';
 import { FormFieldValue } from '../types/types';
-import { colors } from '../config'
+import { colors } from '../config';
+import { SelectInput } from './select-input';
 
 interface FormFieldProps<T> {
   onSubmit: (s: string) => void;
@@ -130,18 +130,6 @@ const getTableContent = (tableItem: any) => {
   return [tableItem];
 };
 
-const SelectIndicator = ({ isSelected }: IndicatorProps) => {
-  return (
-    <Box marginRight={1}>
-      {isSelected ? <Color cyan>{figures.pointer}</Color> : ' '}
-    </Box>
-  );
-};
-
-const SelectItem = ({ isSelected, label }: ItemProps) => {
-  return <Color cyan={isSelected}>{label}</Color>;
-};
-
 const ErrorMessage = ({ message }: { message: string }) => {
   return (
     <>
@@ -176,8 +164,6 @@ export const FormField = <T extends any>({
           items={field.values}
           onSelect={item => onSubmit(item.value as string)}
           initialIndex={initialIndex}
-          indicatorComponent={SelectIndicator}
-          itemComponent={SelectItem}
         />
       </Box>
     );
@@ -220,8 +206,6 @@ export const FormField = <T extends any>({
         <SelectInput
           items={items}
           onSelect={item => onSubmit(item.value as string)}
-          indicatorComponent={SelectIndicator}
-          itemComponent={SelectItem}
         />
       </Box>
     );

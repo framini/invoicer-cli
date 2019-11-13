@@ -3,6 +3,7 @@ import { Box, Color, Text } from 'ink';
 
 import { MainNav } from '../components/main-nav';
 import { Divider } from '../components/divider';
+import figures from 'figures';
 
 export const HomeScreen = ({
   hasFinishedSetup
@@ -12,7 +13,6 @@ export const HomeScreen = ({
   return (
     <Box
       flexDirection="column"
-      alignItems="center"
       width={50}
       paddingLeft={1}
       paddingRight={1}
@@ -30,17 +30,18 @@ export const HomeScreen = ({
 
       <MainNav />
 
-      <Divider padding={0} />
+      <Divider padding={0} width={70} />
 
       <Text>
-        Use the <Color cyan>UP/DOWN</Color> arrow keys to select
+        <Color magenta>{figures.pointerSmall}</Color> Use the{' '}
+        <Color cyan>UP/DOWN</Color> arrow keys to select one of the available options
       </Text>
-      <Text>one of the available options</Text>
       <Text>
-        Press <Color cyan>q</Color> to exit.
+        <Color magenta>{figures.pointerSmall}</Color> Press <Color cyan>q</Color>{' '}
+        to exit.
       </Text>
 
-      <Divider padding={0} />
+      <Divider padding={0} width={70} />
     </Box>
   );
 };

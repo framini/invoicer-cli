@@ -22,8 +22,9 @@ export interface TopLevelRoutesSchema {
 }
 
 interface MenuItem {
-  text: string;
+  label: string;
   id: TopLevelRoutesEvent['type'];
+  value: keyof TopLevelRoutesState;
 }
 
 interface Clients {
@@ -35,7 +36,6 @@ interface Invoices {
 }
 
 export interface TopLevelRoutesContext {
-  navigated: string;
   selected: string;
   finishedSetup: boolean;
   menu: MenuItem[];
@@ -56,7 +56,8 @@ export type TopLevelRoutesEvent =
   | { type: 'CREATE_ENTITY.DISCARD'; payload: any }
   | { type: 'TOP_LEVEL.PROVIDER.CALCULATE_SUCCESS'; payload: any }
   | { type: 'TOP_LEVEL.PROVIDER.CALCULATE_FAILURE'; payload: any }
-  | { type: 'BASE_INFO.SAVE'; payload: any };
+  | { type: 'BASE_INFO.SAVE'; payload: any }
+  | { type: 'TOP_LEVEL.GO_TO'; payload: any };
 
 export const topLevelRoutesMachine = Machine<
   TopLevelRoutesContext,
@@ -67,9 +68,6 @@ export const topLevelRoutesMachine = Machine<
     id: 'main-nav',
     initial: 'initializing',
     context: {
-      // the user enter here by using the arrows
-      // Values are event types, like 'TO_CREATE_CLIENT'
-      navigated: '',
       // when the user selectes one of the sections using 'enter'
       // Values are machine states. Like 'create-client'
       selected: 'home',
@@ -120,87 +118,55 @@ export const topLevelRoutesMachine = Machine<
             }
           ],
           TO_HOME: {
-            target: 'home',
-            actions: 'navigateTo'
+            target: 'home'
           },
           TO_CREATE_INVOICE: {
-            target: 'create-invoice',
-            actions: 'navigateTo'
+            target: 'create-invoice'
           },
           TO_CREATE_CLIENT: {
-            target: 'create-client',
-            actions: 'navigateTo'
+            target: 'create-client'
           },
-          SELECT: {
-            actions: 'selectRoute'
-          }
         }
       },
       home: {
         entry: 'onHomeEntry',
         on: {
           TO_CREATE_INVOICE: {
-            target: 'create-invoice',
-            actions: 'navigateTo'
+            target: 'create-invoice'
           },
           TO_CREATE_CLIENT: {
-            target: 'create-client',
-            actions: 'navigateTo'
+            target: 'create-client'
           },
           TO_BASE_INFO: {
-            target: 'base-info',
-            actions: 'navigateTo'
+            target: 'base-info'
           },
-          SELECT: {
-            actions: 'selectRoute'
-          }
         }
       },
       'create-invoice': {
+        onEntry: 'createEmptyInvoice',
         on: {
           TO_HOME: {
-            target: 'home',
-            actions: 'navigateTo'
+            target: 'home'
           },
           TO_CREATE_CLIENT: {
-            target: 'create-client',
-            actions: 'navigateTo'
+            target: 'create-client'
           },
           TO_BASE_INFO: {
-            target: 'base-info',
-            actions: 'navigateTo'
-          },
-          SELECT: {
-            actions: ['selectRoute', 'createEmptyInvoice'],
-            cond: ctx => ctx.finishedSetup
+            target: 'base-info'
           }
         }
       },
       'create-client': {
+        onEntry: 'createEmptyClient',
         on: {
-          // This should only happens during the initial setup. Right
-          // after setting up the 'base-info' the user will get
-          // redirected here
-          '': [
-            {
-              cond: 'noClientsCreated',
-              actions: 'createEmptyClient'
-            }
-          ],
           TO_CREATE_INVOICE: {
-            target: 'create-invoice',
-            actions: 'navigateTo'
+            target: 'create-invoice'
           },
           TO_HOME: {
-            target: 'home',
-            actions: 'navigateTo'
+            target: 'home'
           },
           TO_BASE_INFO: {
-            target: 'base-info',
-            actions: 'navigateTo'
-          },
-          SELECT: {
-            actions: ['selectRoute', 'createEmptyClient']
+            target: 'base-info'
           }
         }
       },
@@ -238,7 +204,10 @@ export const topLevelRoutesMachine = Machine<
           target: 'home',
           cond: 'hasFinishedSetup'
         }
-      ]
+      ],
+      'TOP_LEVEL.GO_TO': {
+        actions: ['sendNavigateTo', 'trackSelectedRoute']
+      }
     }
   },
   {
@@ -248,16 +217,19 @@ export const topLevelRoutesMachine = Machine<
           return {
             menu: [
               {
-                id: 'TO_CREATE_CLIENT',
-                text: 'Create Client'
+                value: 'create-invoice',
+                label: 'Create Invoice',
+                id: 'TO_CREATE_INVOICE'
               },
               {
-                id: 'TO_CREATE_INVOICE',
-                text: 'Create Invoice'
+                value: 'create-client',
+                label: 'Create Client',
+                id: 'TO_CREATE_CLIENT'
               },
               {
-                id: 'TO_BASE_INFO',
-                text: 'Change Base Info'
+                value: 'base-info',
+                label: 'Change Base Info',
+                id: 'TO_BASE_INFO'
               }
             ]
           };
@@ -268,8 +240,9 @@ export const topLevelRoutesMachine = Machine<
         return {
           menu: [
             {
-              id: 'TO_CREATE_CLIENT',
-              text: 'Create Client'
+              value: 'create-client',
+              label: 'Create Client',
+              id: 'TO_CREATE_CLIENT'
             }
           ]
         };
@@ -277,39 +250,24 @@ export const topLevelRoutesMachine = Machine<
       afterActionCompleted: assign({
         actionCompleted: '',
         activeId: '',
-        selected: 'home',
-        navigated: 'home'
+        selected: 'home'
       }),
       toBaseInfo: assign({
-        selected: 'base-info',
-        navigated: ''
+        selected: 'base-info'
       }),
       toCreateClient: assign({
-        selected: 'create-client',
-        navigated: 'TO_CREATE_CLIENT'
+        selected: 'create-client'
       }),
       toHome: assign({
-        selected: 'home',
-        navigated: 'TO_HOME'
+        selected: 'home'
       }),
-      // used when navigating menu items using the arrow keys
-      navigateTo: assign((ctx, event) => {
+      sendNavigateTo: send((ctx: any, event: any) => {
         return {
-          navigated: event.type
+          type: event.id
         };
       }),
-      // used when selecting one of the available menu items with the
-      // `return` key
-      selectRoute: assign((ctx, event) => {
-        if (event.type === 'SELECT') {
-          return {
-            // @ts-ignore
-            selected: event.value,
-            menu: []
-          };
-        }
-
-        return ctx;
+      trackSelectedRoute: assign({
+        selected: (ctx: any, event: any) => event.value
       }),
       // used for setting up the user's basic info like firstname,
       // lastname, etc
@@ -331,6 +289,8 @@ export const topLevelRoutesMachine = Machine<
       // an `clientMachine` using `spawn`, which will let us
       // connect the 2 machine through the usage of `sendParent`
       createEmptyClient: assign((ctx: TopLevelRoutesContext) => {
+        if (ctx.activeId) return {};
+
         const c = createClient();
 
         return {
@@ -399,7 +359,6 @@ export const topLevelRoutesMachine = Machine<
         const commonUpdates = {
           activeId: '',
           selected: 'home',
-          navigated: 'home'
         };
 
         return {
@@ -426,7 +385,6 @@ export const topLevelRoutesMachine = Machine<
 
         const commonUpdates = {
           selected: 'action-completed',
-          navigated: 'action-completed',
           // we'll use this to show a "confirm" message
           actionCompleted: event.payload.entity,
           // the moment the user created an entity we'll cosider the
@@ -509,9 +467,8 @@ export const topLevelRoutesMachine = Machine<
       isInitialProcess: (ctx: any) =>
         ctx.baseInfo &&
         ctx.baseInfo.firstname &&
-        ctx.baseInfo.lastname &&
-        ctx.navigateTo === '',
-      noClientsCreated: (ctx: any) => Object.keys(ctx.clients).length === 0,
+        ctx.baseInfo.lastname,
+      noClientsCreated: (ctx: any) => Object.keys(ctx.clients).length === 0
     }
   }
 );
