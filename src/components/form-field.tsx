@@ -143,19 +143,28 @@ const ErrorMessage = ({ message }: { message: string }) => {
 };
 
 const getPlaceholder = ({ context, field }: { context: any; field: any }) => {
-  return context[field.value];
+  if (context[field.value]) {
+    return context[field.value]
+  }
+
+  return context[field.defaultValue]
 };
 
 export const FormField = <T extends any>({
   onSubmit,
   field,
   context,
-  value: propsValue
+  // value: propsValue
 }: FormFieldProps<T>) => {
   const [value, setValue] = React.useState('');
 
   if (field.kind === 'select-input') {
-    const index = field.values.findIndex(item => item.value === propsValue);
+    const value = getPlaceholder({
+      context,
+      field
+    })
+
+    const index = field.values.findIndex(item => item.value === value);
     const initialIndex = index > -1 ? index : 0;
     // @ts-ignore
     const error = context[field.errorSrc];
@@ -167,7 +176,7 @@ export const FormField = <T extends any>({
         <SelectInput
           items={field.values}
           onSelect={item => onSubmit(item.value as string)}
-          initialIndex={initialIndex}
+          selectedIndex={initialIndex}
         />
       </Box>
     );

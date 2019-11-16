@@ -94,7 +94,8 @@ export const createInvoice = () => {
             value: '11'
           }
         ],
-        kind: 'select-input'
+        kind: 'select-input',
+        defaultValue: 'recommended_date'
       },
       calculating: {
         kind: 'loading',
@@ -194,7 +195,7 @@ export const invoiceMachine = Machine<any, any, any>(
         invoke: {
           src: 'getDefaultDate',
           onDone: {
-            actions: 'updateDate'
+            actions: 'updateRecommendedDate'
           }
         },
         on: {
@@ -338,7 +339,9 @@ export const invoiceMachine = Machine<any, any, any>(
           fixed_rate: client.fixed_rate
         };
       }),
-      updateDate: assign({ date: (context: any, event: any) => event.data }),
+      updateRecommendedDate: assign({
+        recommended_date: (context: any, event: any) => event.data
+      }),
       updateEntries: assign({
         entries: (context: any, event: any) => event.data
       }),
@@ -405,12 +408,15 @@ export const invoiceMachine = Machine<any, any, any>(
         // if `today` is within the limit of each month, we'll assume
         // we're trying to invoice the last month
         if (isBefore(today, limitWithinMonth)) {
-          defaultMonth = format(subMonths(today, 1), 'MM');
+          defaultMonth = format(subMonths(today, 1), 'M');
         } else {
-          defaultMonth = format(today, 'MM');
+          defaultMonth = format(today, 'M');
         }
 
-        return Promise.resolve(defaultMonth);
+        const parsedMonth = parseInt(defaultMonth, 10);
+
+        // Months are zero based index (from 0 to 11)
+        return Promise.resolve(`${parsedMonth - 1}`);
       },
       formatEntries: async (ctx: any) => {
         const paymentMethodField = ctx.fields.payment.values.find(
