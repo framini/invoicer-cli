@@ -22,6 +22,7 @@ import {
 } from './models/top-level-routes.model';
 import { useKeyboardNav } from './hooks/use-keyboard-nav';
 import { Divider } from './components/divider';
+import { EditClientScreen } from './screens/edit-client.screen';
 
 const App = () => {
   const { state, send, Route } = useRouter<
@@ -97,6 +98,10 @@ const App = () => {
             isInitialSetup={isInitialSetup}
           />
         )}
+      </Route>
+
+      <Route section="edit-client">
+        <EditClientScreen />
       </Route>
 
       <Route section="create-invoice">

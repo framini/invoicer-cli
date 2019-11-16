@@ -99,9 +99,12 @@ const defaultContext = {
 };
 
 export const createHarvestProvider = (provider = {}) => {
+  // @ts-ignore
+  const { ref, ...restProvider } = provider;
+
   return {
     ...defaultContext,
-    ...provider
+    ...restProvider
   };
 };
 

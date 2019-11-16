@@ -142,6 +142,10 @@ const ErrorMessage = ({ message }: { message: string }) => {
   );
 };
 
+const getPlaceholder = ({ context, field }: { context: any; field: any }) => {
+  return context[field.value];
+};
+
 export const FormField = <T extends any>({
   onSubmit,
   field,
@@ -221,7 +225,11 @@ export const FormField = <T extends any>({
   }
 
   // @ts-ignore
-  const placeholder = context[field.value];
+  // const placeholder = context[field.value];
+  const placeholder = getPlaceholder({
+    context,
+    field
+  });
 
   return (
     <Box>

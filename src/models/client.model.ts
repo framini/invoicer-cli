@@ -8,7 +8,7 @@ import {
 import {
   createFixedRateProvider,
   fixedRateProviderMachine
-} from './fixed-rate-provider.model'
+} from './fixed-rate-provider.model';
 import { BaseClient, FormFields } from '../types/types';
 
 export type ClientState = {
@@ -57,7 +57,8 @@ export const createClient = (
     fields: {
       name: {
         label: 'Name',
-        kind: 'input'
+        kind: 'input',
+        value: 'name'
       },
       provider: {
         label: 'Provider',
@@ -71,7 +72,8 @@ export const createClient = (
             value: 'fixed_rate'
           }
         ],
-        kind: 'select-input'
+        kind: 'select-input',
+        value: 'provider'
       },
       review: {
         kind: 'table',
@@ -93,13 +95,11 @@ export const createClient = (
     let ref;
 
     if (c.provider === 'harvest') {
-      ref = spawn(
-        harvestProviderMachine.withContext(c.providers[c.provider])
-      );
+      ref = spawn(harvestProviderMachine.withContext(c.providers[c.provider]));
     } else if (c.provider === 'fixed_rate') {
       ref = spawn(
         fixedRateProviderMachine.withContext(c.providers[c.provider])
-      )
+      );
     } else {
       // we should probably throw in here.
     }
@@ -259,17 +259,22 @@ export const clientMachine = Machine<ClientContext, ClientSchema, ClientEvent>(
         };
       }),
       sendClientDiscard: sendParent((ctx: ClientContext) => {
+        // Heuristic for determining if we should remove the client
+        // when the user exit the screen.
+        const shouldRemove = !ctx.provider || !ctx.providers[ctx.provider];
+
         return {
           type: 'CREATE_ENTITY.DISCARD',
           payload: {
             id: ctx.id,
-            entity: 'clients'
+            entity: 'clients',
+            shouldRemove
           }
         };
       }),
       initHarvestProvider: assign({
         providers: (ctx: any) => {
-          const provider = createHarvestProvider();
+          const provider = createHarvestProvider(ctx.providers.harvest);
 
           return {
             ...ctx.providers,
@@ -281,7 +286,7 @@ export const clientMachine = Machine<ClientContext, ClientSchema, ClientEvent>(
       }),
       initFixedRateProvider: assign({
         providers: (ctx: any) => {
-          const provider = createFixedRateProvider();
+          const provider = createFixedRateProvider(ctx.providers.fixed_rate);
 
           return {
             ...ctx.providers,

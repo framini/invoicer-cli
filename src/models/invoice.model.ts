@@ -379,6 +379,12 @@ export const invoiceMachine = Machine<any, any, any>(
         dependencies_error: (context: any, event: any) => event.data
       }),
       sendInvoiceDiscard: sendParent(ctx => {
+        // Heuristic for determining if we should remove the invoice
+        // when the user exit the screen.
+        // TODO: currently we don't support the option to edit
+        // "Invoices" but if we ever plan to do it we'll have to
+        // implement this const shouldRemove = <TBD>
+
         return {
           type: 'CREATE_ENTITY.DISCARD',
           payload: {

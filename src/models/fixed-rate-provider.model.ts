@@ -6,11 +6,13 @@ const defaultContext = {
   fields: {
     rate: {
       label: 'Total amount',
-      kind: 'input'
+      kind: 'input',
+      value: 'rate'
     },
     description: {
       label: 'Description',
-      kind: 'input'
+      kind: 'input',
+      value: 'description'
     },
     review: {
       kind: 'table',
@@ -23,9 +25,12 @@ const defaultContext = {
 };
 
 export const createFixedRateProvider = (provider = {}) => {
+  // @ts-ignore
+  const { ref, ...restProvider } = provider;
+
   return {
     ...defaultContext,
-    ...provider
+    ...restProvider
   };
 };
 

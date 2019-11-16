@@ -11,6 +11,7 @@ type TopLevelRoutesState = {
   'base-info': {};
   home: {};
   'manage-clients': {};
+  'edit-client': {};
   'create-client': {};
   'create-invoice': {};
   'action-completed': {};
@@ -58,7 +59,9 @@ export type TopLevelRoutesEvent =
   | { type: 'BASE_INFO.SAVE'; payload: any }
   | { type: 'BASE_INFO.DISCARD' }
   | { type: 'TOP_LEVEL.GO_TO'; payload: any }
-  | { type: 'TO_MANAGE_CLIENTS'; payload: any };
+  | { type: 'TO_MANAGE_CLIENTS'; payload: any }
+  | { type: 'TO_EDIT_CLIENT'; payload: any }
+  | { type: 'EDIT_CLIENT.SELECT'; payload: any };
 
 export const topLevelRoutesMachine = Machine<
   TopLevelRoutesContext,
@@ -146,7 +149,7 @@ export const topLevelRoutesMachine = Machine<
           },
           TO_BASE_INFO: {
             target: 'base-info'
-          },
+          }
         }
       },
       'create-invoice': {
@@ -191,6 +194,13 @@ export const topLevelRoutesMachine = Machine<
           }
         }
       },
+      'edit-client': {
+        on: {
+          TO_HOME: {
+            target: 'home'
+          }
+        }
+      },
       'action-completed': {
         on: {
           TO_HOME: {
@@ -232,12 +242,20 @@ export const topLevelRoutesMachine = Machine<
       },
       'TOP_LEVEL.GO_TO': {
         actions: ['sendNavigateTo', 'trackSelectedRoute']
+      },
+      'EDIT_CLIENT.SELECT': {
+        actions: ['selectActiveId', 'sendNavigateTo', 'trackSelectedRoute']
       }
     }
   },
   {
     actions: {
       sendToHome: send('TO_HOME'),
+      selectActiveId: assign({
+        activeId: (ctx: any, event: any) => {
+          return event.activeId;
+        }
+      }),
       onManageClientsEntry: assign(ctx => {
         return {
           menu: [
@@ -245,6 +263,11 @@ export const topLevelRoutesMachine = Machine<
               value: 'create-client',
               label: 'Create Client',
               id: 'TO_CREATE_CLIENT'
+            },
+            {
+              value: 'edit-client',
+              label: 'Edit Client',
+              id: 'TO_EDIT_CLIENT'
             }
           ]
         };
@@ -277,9 +300,9 @@ export const topLevelRoutesMachine = Machine<
         return {
           menu: [
             {
-              value: 'manage-clients',
-              label: 'Manage Clients',
-              id: 'TO_MANAGE_CLIENTS'
+              value: 'create-client',
+              label: 'Create Client',
+              id: 'TO_CREATE_CLIENT'
             }
           ]
         };
@@ -395,6 +418,12 @@ export const topLevelRoutesMachine = Machine<
           selected: 'home'
         };
 
+        if (!event.payload.shouldRemove) {
+          return {
+            ...commonUpdates,
+          }
+        }
+
         return {
           ...commonUpdates,
           [event.payload.entity]: Object.keys(
@@ -494,7 +523,8 @@ export const topLevelRoutesMachine = Machine<
         Object.keys(ctx.clients).length > 0,
       needBaseInfo: (ctx: any) =>
         !ctx.baseInfo || !ctx.baseInfo.firstname || !ctx.baseInfo.lastname,
-      isInitialProcess: (ctx: any) => ctx.baseInfo?.firstname && ctx.baseInfo?.lastname,
+      isInitialProcess: (ctx: any) =>
+        ctx.baseInfo?.firstname && ctx.baseInfo?.lastname,
       noClientsCreated: (ctx: any) => Object.keys(ctx.clients).length === 0
     }
   }
