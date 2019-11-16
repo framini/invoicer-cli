@@ -10,6 +10,7 @@ type TopLevelRoutesState = {
   initializing: {};
   'base-info': {};
   home: {};
+  'manage-clients': {};
   'create-client': {};
   'create-invoice': {};
   'action-completed': {};
@@ -56,7 +57,8 @@ export type TopLevelRoutesEvent =
   | { type: 'TOP_LEVEL.PROVIDER.CALCULATE_FAILURE'; payload: any }
   | { type: 'BASE_INFO.SAVE'; payload: any }
   | { type: 'BASE_INFO.DISCARD' }
-  | { type: 'TOP_LEVEL.GO_TO'; payload: any };
+  | { type: 'TOP_LEVEL.GO_TO'; payload: any }
+  | { type: 'TO_MANAGE_CLIENTS'; payload: any };
 
 export const topLevelRoutesMachine = Machine<
   TopLevelRoutesContext,
@@ -125,6 +127,9 @@ export const topLevelRoutesMachine = Machine<
           TO_CREATE_CLIENT: {
             target: 'create-client'
           },
+          TO_MANAGE_CLIENTS: {
+            target: 'manage-clients'
+          }
         }
       },
       home: {
@@ -132,6 +137,9 @@ export const topLevelRoutesMachine = Machine<
         on: {
           TO_CREATE_INVOICE: {
             target: 'create-invoice'
+          },
+          TO_MANAGE_CLIENTS: {
+            target: 'manage-clients'
           },
           TO_CREATE_CLIENT: {
             target: 'create-client'
@@ -147,8 +155,25 @@ export const topLevelRoutesMachine = Machine<
           TO_HOME: {
             target: 'home'
           },
+          TO_MANAGE_CLIENTS: {
+            target: 'manage-clients'
+          },
+          TO_BASE_INFO: {
+            target: 'base-info'
+          }
+        }
+      },
+      'manage-clients': {
+        onEntry: 'onManageClientsEntry',
+        on: {
+          TO_HOME: {
+            target: 'home'
+          },
           TO_CREATE_CLIENT: {
             target: 'create-client'
+          },
+          TO_CREATE_INVOICE: {
+            target: 'create-invoice'
           },
           TO_BASE_INFO: {
             target: 'base-info'
@@ -158,9 +183,6 @@ export const topLevelRoutesMachine = Machine<
       'create-client': {
         onEntry: 'createEmptyClient',
         on: {
-          TO_CREATE_INVOICE: {
-            target: 'create-invoice'
-          },
           TO_HOME: {
             target: 'home'
           },
@@ -199,22 +221,34 @@ export const topLevelRoutesMachine = Machine<
           cond: 'noClientsCreated'
         },
         {
-          actions: ['saveBaseInfo', 'toHome', send('TO_HOME')],
+          actions: ['saveBaseInfo', 'toHome', 'sendToHome'],
           target: 'home',
           cond: 'hasFinishedSetup'
         }
       ],
       'BASE_INFO.DISCARD': {
-        actions: ['toHome', send('TO_HOME')],
-        target: 'home',
+        actions: ['toHome', 'sendToHome'],
+        target: 'home'
       },
       'TOP_LEVEL.GO_TO': {
         actions: ['sendNavigateTo', 'trackSelectedRoute']
-      },
+      }
     }
   },
   {
     actions: {
+      sendToHome: send('TO_HOME'),
+      onManageClientsEntry: assign(ctx => {
+        return {
+          menu: [
+            {
+              value: 'create-client',
+              label: 'Create Client',
+              id: 'TO_CREATE_CLIENT'
+            }
+          ]
+        };
+      }),
       onHomeEntry: assign(ctx => {
         if (ctx.finishedSetup) {
           return {
@@ -225,9 +259,9 @@ export const topLevelRoutesMachine = Machine<
                 id: 'TO_CREATE_INVOICE'
               },
               {
-                value: 'create-client',
-                label: 'Create Client',
-                id: 'TO_CREATE_CLIENT'
+                value: 'manage-clients',
+                label: 'Manage Clients',
+                id: 'TO_MANAGE_CLIENTS'
               },
               {
                 value: 'base-info',
@@ -243,9 +277,9 @@ export const topLevelRoutesMachine = Machine<
         return {
           menu: [
             {
-              value: 'create-client',
-              label: 'Create Client',
-              id: 'TO_CREATE_CLIENT'
+              value: 'manage-clients',
+              label: 'Manage Clients',
+              id: 'TO_MANAGE_CLIENTS'
             }
           ]
         };
@@ -332,19 +366,16 @@ export const topLevelRoutesMachine = Machine<
       // @ts-ignore
       initializer: assign({
         clients: (ctx: TopLevelRoutesContext, event: TopLevelRoutesEvent) => {
-          return Object.keys(ctx.clients).reduce(
-            (reducer, c) => {
-              const client = createClient(ctx.clients[c]);
+          return Object.keys(ctx.clients).reduce((reducer, c) => {
+            const client = createClient(ctx.clients[c]);
 
-              reducer[client.id] = {
-                ...client,
-                ref: spawn(clientMachine.withContext(client))
-              };
+            reducer[client.id] = {
+              ...client,
+              ref: spawn(clientMachine.withContext(client))
+            };
 
-              return reducer;
-            },
-            {} as Clients
-          );
+            return reducer;
+          }, {} as Clients);
         },
         baseInfo: (ctx: TopLevelRoutesContext, event: TopLevelRoutesEvent) => {
           const bi = createBaseInfo(ctx.baseInfo);
@@ -361,7 +392,7 @@ export const topLevelRoutesMachine = Machine<
 
         const commonUpdates = {
           activeId: '',
-          selected: 'home',
+          selected: 'home'
         };
 
         return {
@@ -369,17 +400,14 @@ export const topLevelRoutesMachine = Machine<
           [event.payload.entity]: Object.keys(
             // @ts-ignore
             ctx[event.payload.entity]
-          ).reduce(
-            (reducer, key) => {
-              if (key !== event.payload.id) {
-                // @ts-ignore
-                reducer[key] = ctx[event.payload.entity][key];
-              }
+          ).reduce((reducer, key) => {
+            if (key !== event.payload.id) {
+              // @ts-ignore
+              reducer[key] = ctx[event.payload.entity][key];
+            }
 
-              return reducer;
-            },
-            {} as Clients
-          )
+            return reducer;
+          }, {} as Clients)
         };
       }),
       // used for confirming the creation of an entity (client or invoice)
@@ -461,16 +489,12 @@ export const topLevelRoutesMachine = Machine<
     },
     guards: {
       hasFinishedSetup: (ctx: any) =>
-        ctx.baseInfo &&
-        ctx.baseInfo.firstname &&
-        ctx.baseInfo.lastname &&
+        ctx.baseInfo?.firstname &&
+        ctx.baseInfo?.lastname &&
         Object.keys(ctx.clients).length > 0,
       needBaseInfo: (ctx: any) =>
         !ctx.baseInfo || !ctx.baseInfo.firstname || !ctx.baseInfo.lastname,
-      isInitialProcess: (ctx: any) =>
-        ctx.baseInfo &&
-        ctx.baseInfo.firstname &&
-        ctx.baseInfo.lastname,
+      isInitialProcess: (ctx: any) => ctx.baseInfo?.firstname && ctx.baseInfo?.lastname,
       noClientsCreated: (ctx: any) => Object.keys(ctx.clients).length === 0
     }
   }

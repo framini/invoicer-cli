@@ -2,20 +2,10 @@ import React from 'react';
 import { Box } from 'ink';
 
 import { TopLevelRouteContext } from './top-level-route-context';
-import { useRouter } from '../hooks/use-router';
-import {
-  TopLevelRoutesContext,
-  TopLevelRoutesSchema,
-  TopLevelRoutesEvent
-} from '../models/top-level-routes.model';
 import { SelectInput } from './select-input';
 
 export const MainNav = () => {
-  const { state, send } = useRouter<
-    TopLevelRoutesContext,
-    TopLevelRoutesSchema,
-    TopLevelRoutesEvent
-  >(TopLevelRouteContext);
+  const { state, send } = React.useContext(TopLevelRouteContext);
 
   return (
     <>
@@ -23,6 +13,7 @@ export const MainNav = () => {
         <SelectInput
           items={state.context.menu}
           onSelect={(item: any) => {
+            // @ts-ignore
             send('TOP_LEVEL.GO_TO', { value: item.value, id: item.id })
           }}
         />

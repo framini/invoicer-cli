@@ -14,6 +14,7 @@ import { CreateInvoiceScreen } from './screens/create-invoice.screen';
 import { ActionCompleted } from './screens/action-completed.screen';
 import { HomeScreen } from './screens/home.screen';
 import { BaseInfoScreen } from './screens/base-info.screen';
+import { ManageClientsScreen } from './screens/manage-clients';
 import {
   TopLevelRoutesContext,
   TopLevelRoutesSchema,
@@ -83,6 +84,10 @@ const App = () => {
 
       <Route section="home">
         <HomeScreen hasFinishedSetup={state.context.finishedSetup} />
+      </Route>
+
+      <Route section="manage-clients">
+        <ManageClientsScreen />
       </Route>
 
       <Route section="create-client">

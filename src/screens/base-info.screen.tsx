@@ -23,8 +23,7 @@ export const BaseInfoScreen = ({
 
   useInput((input, key) => {
     if (key.escape && !isInitialSetup) {
-      // @ts-ignore
-      send('BASE_INFO.DISCARD');
+      send('BASE_INFO.LOCAL_DISCARD');
     }
   });
 
