@@ -37,7 +37,7 @@ export const ActionCompleted = ({
         <Color green>{figures.tick}</Color>{' '}
         {entityName ? (
           <Text italic bold>
-            {entityName} created successfully!
+            [{entityName}] action performed successfully!
           </Text>
         ) : (
           <Text italic bold>

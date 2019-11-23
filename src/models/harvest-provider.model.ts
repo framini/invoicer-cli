@@ -3,6 +3,7 @@ import Decimal from 'decimal.js';
 import { format, endOfMonth, getYear } from 'date-fns';
 
 import { api } from '../utils/api';
+import { FormFields } from '../types/types';
 
 const getTimeEntriesFromHarvest = async (
   {
@@ -45,6 +46,49 @@ const getTimeEntriesFromHarvest = async (
 
   return [...acc, ...data.time_entries];
 };
+
+type HarvestProviderState = {
+  idle: {};
+  accountId: {};
+  token: {};
+  typeOfContract: {};
+  flat_salary: {};
+  hourly_rate: {};
+  loading: {};
+  retry: {};
+  calculate: {};
+  format: {};
+  success: {};
+  failure: {};
+};
+
+interface HarvestProviderSchema {
+  states: HarvestProviderState;
+}
+
+type HarvestProviderFormFields = FormFields<
+  Pick<
+    HarvestProviderState,
+    | 'accountId'
+    | 'token'
+    | 'typeOfContract'
+    | 'flat_salary'
+    | 'hourly_rate'
+    | 'retry'
+  >
+>;
+
+interface HarvestProviderContext {
+  fields: HarvestProviderFormFields;
+}
+
+type HarvestProviderEvents =
+  | {
+      type: 'CLIENT_PROVIDER.NEXT';
+    }
+  | {
+      type: 'PROVIDER.CALCULATE';
+    };
 
 const defaultContext = {
   url: 'https://api.harvestapp.com/v2/users/me',
@@ -108,10 +152,15 @@ export const createHarvestProvider = (provider = {}) => {
   };
 };
 
-export const harvestProviderMachine = Machine<any, any, any>(
+export const harvestProviderMachine = Machine<
+  HarvestProviderContext,
+  HarvestProviderSchema,
+  HarvestProviderEvents
+>(
   {
     id: 'harvest-provider',
     initial: 'idle',
+    // @ts-ignore
     context: {},
     states: {
       idle: {
@@ -297,37 +346,31 @@ export const harvestProviderMachine = Machine<any, any, any>(
           accountId: ctx.accountId
         });
 
-        const final = data.reduce(
-          (reducer: any, b: any) => {
-            if (!reducer[b.client.name]) {
-              reducer[b.client.name] = 0;
-            }
+        const final = data.reduce((reducer: any, b: any) => {
+          if (!reducer[b.client.name]) {
+            reducer[b.client.name] = 0;
+          }
 
-            const month = new Date(b.spent_date).getMonth();
+          const month = new Date(b.spent_date).getMonth();
 
-            if (month == payload.date) {
-              reducer[b.client.name] += new Decimal(b.hours)
-                .mul(60)
-                .toNearest(6, Decimal.ROUND_UP)
-                .dividedBy(60)
-                .toNumber();
-            }
-
-            return reducer;
-          },
-          {} as any
-        );
-
-        return Object.keys(final).reduce(
-          (reducer, key) => {
-            reducer[key] = new Decimal(final[key])
-              .toSignificantDigits(4, Decimal.ROUND_HALF_UP)
+          if (month == payload.date) {
+            reducer[b.client.name] += new Decimal(b.hours)
+              .mul(60)
+              .toNearest(6, Decimal.ROUND_UP)
+              .dividedBy(60)
               .toNumber();
+          }
 
-            return reducer;
-          },
-          {} as any
-        );
+          return reducer;
+        }, {} as any);
+
+        return Object.keys(final).reduce((reducer, key) => {
+          reducer[key] = new Decimal(final[key])
+            .toSignificantDigits(4, Decimal.ROUND_HALF_UP)
+            .toNumber();
+
+          return reducer;
+        }, {} as any);
       },
       formatEntries: async (ctx: any) => {
         const totalHours = Object.keys(ctx.entries).reduce(
@@ -356,9 +399,12 @@ export const harvestProviderMachine = Machine<any, any, any>(
 
         // we'll only include `totalHours` for `flat_salary` since for
         // `hourly_rate` we don't need to fill in that field
-        const totalHoursProp = ctx.typeOfContract === 'flat_salary' ? {
-          totalHours
-        } : {}
+        const totalHoursProp =
+          ctx.typeOfContract === 'flat_salary'
+            ? {
+                totalHours
+              }
+            : {};
 
         return {
           ...totalHoursProp,

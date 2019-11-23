@@ -1,5 +1,35 @@
 import { Machine, assign, sendParent } from 'xstate';
 
+import { FormFields } from '../types/types';
+
+type FixedRateProviderState = {
+  idle: {};
+  rate: {};
+  description: {};
+  format: {};
+  success: {};
+};
+
+interface FixedRateProviderSchema {
+  states: FixedRateProviderState;
+}
+
+type FixedRateProviderFormFields = FormFields<
+  Pick<FixedRateProviderState, 'rate' | 'description'>
+>;
+
+interface FixedRateProviderContext {
+  fields: FixedRateProviderFormFields;
+}
+
+type FixedRateProviderEvents =
+  | {
+      type: 'CLIENT_PROVIDER.NEXT';
+    }
+  | {
+      type: 'PROVIDER.CALCULATE';
+    };
+
 const defaultContext = {
   rate: '',
   description: '',
@@ -13,13 +43,6 @@ const defaultContext = {
       label: 'Description',
       kind: 'input',
       value: 'description'
-    },
-    review: {
-      kind: 'table',
-      columns: [
-        { label: 'Total amount', value: 'rate' },
-        { label: 'Description', value: 'description' }
-      ]
     }
   }
 };
@@ -34,18 +57,22 @@ export const createFixedRateProvider = (provider = {}) => {
   };
 };
 
-export const fixedRateProviderMachine = Machine<any, any, any>(
+export const fixedRateProviderMachine = Machine<
+  FixedRateProviderContext,
+  FixedRateProviderSchema,
+  FixedRateProviderEvents
+>(
   {
     id: 'fixed-rate-provider',
     initial: 'idle',
+    // @ts-ignore
     context: {},
     states: {
       idle: {
         on: {
           '': [
             {
-              target: 'rate',
-              // cond: 'isEmptyProvider'
+              target: 'rate'
             }
           ]
         }
@@ -107,12 +134,14 @@ export const fixedRateProviderMachine = Machine<any, any, any>(
     services: {
       formatEntries: async (ctx: any) => {
         return {
-          report: [{
-            'Project Name': ctx.description,
-            'Hourly Rate': '',
-            Hours: '',
-            'Amount US$': parseFloat(ctx.rate),
-          }]
+          report: [
+            {
+              'Project Name': ctx.description,
+              'Hourly Rate': '',
+              Hours: '',
+              'Amount US$': parseFloat(ctx.rate)
+            }
+          ]
         };
       }
     }

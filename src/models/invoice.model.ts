@@ -5,6 +5,63 @@ import { subMonths, format, isBefore, setDate, setMonth } from 'date-fns';
 import { toXlsx, checkRequiredVariables } from '../utils/xlsx';
 import * as config from '../config';
 import { fileExists } from '../utils/fs';
+import { FormFields } from '../types/types';
+
+type InvoiceMachineState = {
+  client: {};
+  payment: {};
+  date: {};
+  calculating: {};
+  format: {};
+  retry_calculating: {};
+  review: {};
+  check_dependencies: {};
+  retry_check_dependencies: {};
+  generate: {};
+  retry_generate: {};
+  success: {};
+  failure: {};
+};
+
+interface InvoiceMachineSchema {
+  states: InvoiceMachineState;
+}
+
+export type InvoiceMachineEvents =
+  | {
+      type: 'INVOICE.NEXT';
+    }
+  | {
+      type: 'PROVIDER.CALCULATE_SUCCESS';
+    }
+  | {
+      type: 'PROVIDER.CALCULATE_FAILURE';
+    }
+  | {
+      type: 'INVOICE.DISCARD';
+    };
+
+type InvoiceMachineFields = FormFields<
+  Pick<
+    InvoiceMachineState,
+    | 'payment'
+    | 'client'
+    | 'date'
+    | 'calculating'
+    | 'check_dependencies'
+    | 'review'
+    | 'retry_generate'
+    | 'retry_calculating'
+    | 'retry_check_dependencies'
+  >
+>;
+
+export interface InvoiceMachineContext {
+  id: string;
+  firstname: string;
+  lastname: string;
+  fields: InvoiceMachineFields;
+}
 
 export const createInvoice = () => {
   return {
@@ -169,10 +226,15 @@ export const createInvoice = () => {
   };
 };
 
-export const invoiceMachine = Machine<any, any, any>(
+export const invoiceMachine = Machine<
+  InvoiceMachineContext,
+  InvoiceMachineSchema,
+  InvoiceMachineEvents
+>(
   {
     id: 'invoice',
     initial: 'client',
+    // @ts-ignore
     context: {},
     states: {
       client: {
@@ -381,7 +443,7 @@ export const invoiceMachine = Machine<any, any, any>(
       onCheckDependenciesFail: assign({
         dependencies_error: (context: any, event: any) => event.data
       }),
-      sendInvoiceDiscard: sendParent(ctx => {
+      sendInvoiceDiscard: sendParent((ctx: InvoiceMachineContext) => {
         // Heuristic for determining if we should remove the invoice
         // when the user exit the screen.
         // TODO: currently we don't support the option to edit
@@ -427,14 +489,11 @@ export const invoiceMachine = Machine<any, any, any>(
           ? paymentMethodField.label
           : ctx.payment;
 
-        const supportedVariables = config.app.variables.reduce(
-          (reducer, v) => {
-            reducer[v.name] = undefined;
+        const supportedVariables = config.app.variables.reduce((reducer, v) => {
+          reducer[v.name] = undefined;
 
-            return reducer;
-          },
-          {} as Record<string, undefined>
-        );
+          return reducer;
+        }, {} as Record<string, undefined>);
 
         // This is a convienent way for deleting unsued variables
         // within the xlx template since properties with `underfined`
@@ -480,18 +539,20 @@ export const invoiceMachine = Machine<any, any, any>(
           );
         }
 
-        const keys = Object.keys(ctx.formatted).filter(k => ctx.formatted[k]).filter(k => {
-          const variable = config.app.variables.find(v => v.name === k);
+        const keys = Object.keys(ctx.formatted)
+          .filter(k => ctx.formatted[k])
+          .filter(k => {
+            const variable = config.app.variables.find(v => v.name === k);
 
-          // This way we make sure we're only validating `required`
-          // variables and any other, whether defined or non required
-          // will be filtered out.
-          if (variable && variable.required) {
-            return true;
-          }
+            // This way we make sure we're only validating `required`
+            // variables and any other, whether defined or non required
+            // will be filtered out.
+            if (variable && variable.required) {
+              return true;
+            }
 
-          return false;
-        });
+            return false;
+          });
 
         await checkRequiredVariables(config.app.templatePath, keys);
 
@@ -499,10 +560,10 @@ export const invoiceMachine = Machine<any, any, any>(
       }
     },
     guards: {
-      shouldAbortRetry: (ctx, event) => {
+      shouldAbortRetry: (ctx: InvoiceMachineContext, event: any) => {
         return event.value === 'no';
       },
-      shouldRetry: (ctx, event) => {
+      shouldRetry: (ctx: InvoiceMachineContext, event: any) => {
         return event.value === 'yes';
       }
     }
