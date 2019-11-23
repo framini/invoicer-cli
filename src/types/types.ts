@@ -34,6 +34,7 @@ export type FormFieldValue =
       kind: Extract<FormFieldKind, 'input'>;
       value?: string;
       label: string;
+      required?: boolean
     }
   | {
       kind: Extract<FormFieldKind, 'select-input'>;

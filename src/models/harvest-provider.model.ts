@@ -97,11 +97,13 @@ const defaultContext = {
   fields: {
     accountId: {
       label: 'Account ID',
-      kind: 'input'
+      kind: 'input',
+      required: true
     },
     token: {
       label: 'Token',
-      kind: 'input'
+      kind: 'input',
+      required: true
     },
     typeOfContract: {
       label: 'Specify the type of arrangement/contract with this client',
@@ -119,11 +121,13 @@ const defaultContext = {
     },
     flat_salary: {
       label: 'Enter flat salary',
-      kind: 'input'
+      kind: 'input',
+      required: true
     },
     hourly_rate: {
       label: 'Enter hourly rate',
-      kind: 'input'
+      kind: 'input',
+      required: true
     },
     retry: {
       label: 'Invalid token/Account it. Do you want to re-enter them?',

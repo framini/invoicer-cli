@@ -144,17 +144,16 @@ const ErrorMessage = ({ message }: { message: string }) => {
 
 const getPlaceholder = ({ context, field }: { context: any; field: any }) => {
   if (context[field.value]) {
-    return context[field.value]
+    return context[field.value];
   }
 
-  return context[field.defaultValue]
+  return context[field.defaultValue];
 };
 
 export const FormField = <T extends any>({
   onSubmit,
   field,
-  context,
-  // value: propsValue
+  context
 }: FormFieldProps<T>) => {
   const [value, setValue] = React.useState('');
 
@@ -162,7 +161,7 @@ export const FormField = <T extends any>({
     const value = getPlaceholder({
       context,
       field
-    })
+    });
 
     const index = field.values.findIndex(item => item.value === value);
     const initialIndex = index > -1 ? index : 0;
@@ -242,7 +241,10 @@ export const FormField = <T extends any>({
 
   return (
     <Box>
-      <Text>{field.label}: </Text>
+      <Text>
+        {field.label}
+        {field.required && <Color red>*</Color>}:{' '}
+      </Text>
       <TextInput
         placeholder={placeholder}
         value={value}
@@ -250,6 +252,11 @@ export const FormField = <T extends any>({
           setValue(value);
         }}
         onSubmit={value => {
+          // TODO: we might want to show the user some feedback?
+          if (!value && !placeholder && field.required) {
+            return;
+          }
+
           setValue('');
           onSubmit(value || placeholder);
         }}

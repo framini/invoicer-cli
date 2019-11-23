@@ -45,6 +45,11 @@ const App = () => {
   });
 
   const isInitialSetup =
+    !state.context.baseInfo?.firstname &&
+    !state.context.baseInfo?.lastname &&
+    noClientsCreated;
+
+  const shouldGoToCreateClient =
     state.context.baseInfo?.firstname &&
     state.context.baseInfo?.lastname &&
     noClientsCreated;
@@ -96,7 +101,7 @@ const App = () => {
         {state.context.activeId && (
           <CreateClientScreen
             client={state.context.clients[state.context.activeId]}
-            isInitialSetup={isInitialSetup}
+            isInitialSetup={shouldGoToCreateClient}
           />
         )}
       </Route>

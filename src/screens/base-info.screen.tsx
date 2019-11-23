@@ -46,9 +46,7 @@ export const BaseInfoScreen = ({
     <BaseScreen
       header={
         <>
-          <Title>
-            Setup personal details:
-          </Title>
+          <Title>Setup personal details:</Title>
 
           {isInitialSetup && (
             <Notes>
@@ -66,9 +64,11 @@ export const BaseInfoScreen = ({
           <ListItem>
             Press <Color cyan>ENTER</Color> to move to the next field.
           </ListItem>
-          <ListItem>
-            Leaving the placeholder unchanged will leave the field as it is.
-          </ListItem>
+          {!isInitialSetup && (
+            <ListItem>
+              Leaving the placeholder unchanged will leave the field as it is.
+            </ListItem>
+          )}
         </>
       }
     >

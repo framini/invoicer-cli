@@ -37,12 +37,14 @@ const defaultContext = {
     rate: {
       label: 'Total amount',
       kind: 'input',
-      value: 'rate'
+      value: 'rate',
+      required: true
     },
     description: {
       label: 'Description',
       kind: 'input',
-      value: 'description'
+      value: 'description',
+      required: true
     }
   }
 };

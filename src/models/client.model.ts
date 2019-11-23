@@ -58,7 +58,8 @@ export const createClient = (
       name: {
         label: 'Name',
         kind: 'input',
-        value: 'name'
+        value: 'name',
+        required: true
       },
       provider: {
         label: 'Provider',

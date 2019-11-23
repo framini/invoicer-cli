@@ -39,12 +39,14 @@ const defaultContext: BaseMachineContext = {
     firstname: {
       label: 'First Name',
       kind: 'input',
-      value: 'firstname'
+      value: 'firstname',
+      required: true
     },
     lastname: {
       label: 'Last Name',
       kind: 'input',
-      value: 'lastname'
+      value: 'lastname',
+      required: true
     },
     review: {
       label: 'Review',
@@ -77,7 +79,7 @@ export const baseInfoMachine = Machine<
         on: {
           'BASE_INFO.NEXT': {
             target: 'lastname',
-            actions: ['updateContextKey']
+            actions: ['updateContextKey'],
           }
         }
       },
@@ -134,7 +136,6 @@ export const baseInfoMachine = Machine<
           };
         }
       )
-      // saveBaseInfo: sendParent('BASE_INFO.SAVE')
     }
   }
 );
