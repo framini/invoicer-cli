@@ -85,7 +85,7 @@ const App = () => {
       </Route>
 
       <Route section="home">
-        <HomeScreen hasFinishedSetup={state.context.finishedSetup} />
+        <HomeScreen />
       </Route>
 
       <Route section="manage-clients">

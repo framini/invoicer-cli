@@ -3,7 +3,8 @@ import { Color, Box, useInput, Text } from 'ink';
 import figures from 'figures';
 
 import { capitalize, getSingular } from '../utils/general';
-import { Divider } from '../components/divider';
+import { BaseScreen } from './base.screen';
+import { ListItem } from '../components/list-item';
 
 export const ActionCompleted = ({
   actionCompleted,
@@ -17,6 +18,14 @@ export const ActionCompleted = ({
       onConfirm();
     }
   });
+
+  React.useEffect(() => {
+    // we'll automatically leave the screen if no actions were
+    // performed
+    if (actionCompleted === 'no-action') {
+      onConfirm();
+    }
+  }, [onConfirm, actionCompleted]);
 
   if (!actionCompleted) {
     return (
@@ -32,27 +41,23 @@ export const ActionCompleted = ({
   const entityName = capitalize(getSingular(actionCompleted));
 
   return (
-    <React.Fragment>
-      <Box paddingTop={1} paddingBottom={1}>
-        <Color green>{figures.tick}</Color>{' '}
-        {entityName ? (
-          <Text italic bold>
-            [{entityName}] action performed successfully!
-          </Text>
-        ) : (
-          <Text italic bold>
-            action completed!
-          </Text>
-        )}
-      </Box>
-
-      <Divider padding={0} />
-
-      <Box>
-        Press <Color cyan>ENTER</Color> to continue
-      </Box>
-
-      <Divider padding={0} />
-    </React.Fragment>
+    <BaseScreen
+      footer={
+        <ListItem>
+          Press <Color cyan>ENTER</Color> to continue
+        </ListItem>
+      }
+    >
+      <Color green>{figures.tick}</Color>{' '}
+      {entityName ? (
+        <Text italic bold>
+          [{entityName}] action performed successfully!
+        </Text>
+      ) : (
+        <Text italic bold>
+          action completed!
+        </Text>
+      )}
+    </BaseScreen>
   );
 };

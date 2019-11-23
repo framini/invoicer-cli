@@ -1,9 +1,11 @@
 import React from 'react';
-import { Box, useInput, Text, Color } from 'ink';
+import { useInput } from 'ink';
 import { useService } from '@xstate/react';
 
 import { FormField, getField } from '../components/form-field';
-import { Divider } from '../components/divider';
+import { BaseScreen } from './base.screen';
+import { Title } from '../components/title';
+import { Notes, GoBackMessage } from '../components/messages';
 
 export const CreateInvoiceScreen = ({ invoice }: { invoice: any }) => {
   const [state, send] = useService<any, any>(invoice.ref);
@@ -28,18 +30,16 @@ export const CreateInvoiceScreen = ({ invoice }: { invoice: any }) => {
   const value = state.context[state.value];
 
   return (
-    <>
-      <Box paddingTop={1} flexDirection="column">
-        <Text bold>
-          <Color magenta>Creating an Invoice:</Color>
-        </Text>
-      </Box>
-      <Box paddingTop={1}>
-        <Text italic bold>
-          Note: You can cancel by pressing <Color cyan>ESC</Color>
-        </Text>
-      </Box>
-      <Divider padding={0} />
+    <BaseScreen
+      header={
+        <>
+          <Title>Creating an Invoice:</Title>
+          <Notes>
+            <GoBackMessage />
+          </Notes>
+        </>
+      }
+    >
       {field && (
         <FormField
           field={field}
@@ -50,6 +50,6 @@ export const CreateInvoiceScreen = ({ invoice }: { invoice: any }) => {
           value={value}
         />
       )}
-    </>
+    </BaseScreen>
   );
 };

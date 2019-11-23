@@ -1,10 +1,11 @@
 import React from 'react';
-import { Box, Color, Text, useInput } from 'ink';
+import { Color, useInput } from 'ink';
 
 import { MainNav } from '../components/main-nav';
-import { Divider } from '../components/divider';
-import figures from 'figures';
 import { TopLevelRouteContext } from '../components/top-level-route-context';
+import { BaseScreen } from './base.screen';
+import { ListItem } from '../components/list-item';
+import { Title } from '../components/title';
 
 export const ManageClientsScreen = () => {
   const { send } = React.useContext(TopLevelRouteContext);
@@ -17,18 +18,18 @@ export const ManageClientsScreen = () => {
   });
 
   return (
-    <Box flexDirection="column" width={50} paddingLeft={1} paddingRight={1}>
+    <BaseScreen
+      header={
+        <Title>Manage clients:</Title>
+      }
+      footer={
+        <ListItem>
+          Use the <Color cyan>UP/DOWN</Color> arrow keys to select one of the
+          available options
+        </ListItem>
+      }
+    >
       <MainNav />
-
-      <Divider padding={0} width={70} />
-
-      <Text>
-        <Color magenta>{figures.pointerSmall}</Color> Use the{' '}
-        <Color cyan>UP/DOWN</Color> arrow keys to select one of the available
-        options
-      </Text>
-
-      <Divider padding={0} width={70} />
-    </Box>
+    </BaseScreen>
   );
 };

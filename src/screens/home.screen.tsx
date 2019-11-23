@@ -1,47 +1,28 @@
 import React from 'react';
-import { Box, Color, Text } from 'ink';
+import { Color } from 'ink';
 
+import { BaseScreen } from './base.screen';
 import { MainNav } from '../components/main-nav';
-import { Divider } from '../components/divider';
-import figures from 'figures';
+import { ListItem } from '../components/list-item';
+import { Title } from '../components/title';
 
-export const HomeScreen = ({
-  hasFinishedSetup
-}: {
-  hasFinishedSetup: boolean;
-}) => {
+export const HomeScreen = () => {
   return (
-    <Box
-      flexDirection="column"
-      width={50}
-      paddingLeft={1}
-      paddingRight={1}
-    >
-      {!hasFinishedSetup && (
+    <BaseScreen
+      header={<Title>Home:</Title>}
+      footer={
         <>
-          <Color magenta>
-            <Text bold>Welcome! Before being able to create an invoice</Text>
-          </Color>
-          <Color magenta>
-            <Text bold>you must create a client first.</Text>
-          </Color>
+          <ListItem>
+            Use the <Color cyan>UP/DOWN</Color> arrow keys to select one of the
+            available options
+          </ListItem>
+          <ListItem>
+            Press <Color cyan>q</Color> to exit.
+          </ListItem>
         </>
-      )}
-
+      }
+    >
       <MainNav />
-
-      <Divider padding={0} width={70} />
-
-      <Text>
-        <Color magenta>{figures.pointerSmall}</Color> Use the{' '}
-        <Color cyan>UP/DOWN</Color> arrow keys to select one of the available options
-      </Text>
-      <Text>
-        <Color magenta>{figures.pointerSmall}</Color> Press <Color cyan>q</Color>{' '}
-        to exit.
-      </Text>
-
-      <Divider padding={0} width={70} />
-    </Box>
+    </BaseScreen>
   );
 };

@@ -1,10 +1,12 @@
 import React from 'react';
-import { Box, Color, Text, useInput } from 'ink';
+import { Color, useInput } from 'ink';
 
-import { Divider } from '../components/divider';
-import figures from 'figures';
 import { TopLevelRouteContext } from '../components/top-level-route-context';
 import { SelectInput } from '../components/select/select-input';
+import { GoBackMessage, Notes } from '../components/messages';
+import { BaseScreen } from './base.screen';
+import { Title } from '../components/title';
+import { ListItem } from '../components/list-item';
 
 export const EditClientScreen = () => {
   const { state, send } = React.useContext(TopLevelRouteContext);
@@ -29,8 +31,22 @@ export const EditClientScreen = () => {
   });
 
   return (
-    <Box flexDirection="column" width={50} paddingLeft={1} paddingRight={1}>
-      <Text>Select the client you want to modify: </Text>
+    <BaseScreen
+      header={
+        <>
+          <Title>Select the client you want to modify:</Title>
+          <Notes>
+            <GoBackMessage />
+          </Notes>
+        </>
+      }
+      footer={
+        <ListItem>
+          Use the <Color cyan>UP/DOWN</Color> arrow keys to select one of the
+          available options
+        </ListItem>
+      }
+    >
       <SelectInput
         items={clients}
         onSelect={item => {
@@ -42,16 +58,6 @@ export const EditClientScreen = () => {
           });
         }}
       />
-
-      <Divider padding={0} width={70} />
-
-      <Text>
-        <Color magenta>{figures.pointerSmall}</Color> Use the{' '}
-        <Color cyan>UP/DOWN</Color> arrow keys to select one of the available
-        options
-      </Text>
-
-      <Divider padding={0} width={70} />
-    </Box>
+    </BaseScreen>
   );
 };

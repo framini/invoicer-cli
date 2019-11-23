@@ -285,7 +285,7 @@ export const topLevelRoutesMachine = Machine<
             },
             {
               value: 'remove-client',
-              label: 'Remove Client/s',
+              label: 'Remove Clients',
               id: 'TO_REMOVE_CLIENT'
             }
           ]
@@ -429,7 +429,7 @@ export const topLevelRoutesMachine = Machine<
         }
       }),
       removeClients: assign((ctx, event) => {
-        return {
+        const updates = {
           clients: Object.keys(
             ctx.clients
           ).reduce((reducer, key) => {
@@ -442,6 +442,16 @@ export const topLevelRoutesMachine = Machine<
 
             return reducer;
           }, {} as Clients)
+        };
+
+        db.set(updates);
+
+        // @ts-ignore
+        const actionCompleted = event.items.length ? 'clients-removed' : 'no-action';
+
+        return {
+          actionCompleted,
+          ...updates
         };
       }),
       // used when aborting a create process (client or invoice)

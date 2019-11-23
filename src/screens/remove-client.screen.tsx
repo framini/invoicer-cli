@@ -1,10 +1,11 @@
 import React from 'react';
-import { Box, Color, Text, useInput } from 'ink';
+import { Color, useInput } from 'ink';
 
-import { Divider } from '../components/divider';
-import figures from 'figures';
 import { TopLevelRouteContext } from '../components/top-level-route-context';
 import { MultiSelectInput } from '../components/select/multi-select-input';
+import { BaseScreen } from './base.screen';
+import { ListItem } from '../components/list-item';
+import { Title } from '../components/title';
 
 export const RemoveClientScreen = () => {
   const { state, send } = React.useContext(TopLevelRouteContext);
@@ -29,8 +30,20 @@ export const RemoveClientScreen = () => {
   });
 
   return (
-    <Box flexDirection="column" width={50} paddingLeft={1} paddingRight={1}>
-      <Text>Select the client you want to modify: </Text>
+    <BaseScreen
+      header={<Title>Select the clients you want to remove:</Title>}
+      footer={
+        <>
+          <ListItem>
+            Use the <Color cyan>SPACE</Color> key to select the clients to
+            remove
+          </ListItem>
+          <ListItem>
+            Press <Color cyan>ENTER</Color> to confirm
+          </ListItem>
+        </>
+      }
+    >
       <MultiSelectInput
         items={clients}
         onSelect={items => {
@@ -41,21 +54,6 @@ export const RemoveClientScreen = () => {
           });
         }}
       />
-
-      <Divider padding={0} width={70} />
-
-      <Text>
-        <Color magenta>{figures.pointerSmall}</Color> Use the{' '}
-        <Color cyan>UP/DOWN</Color> arrow keys to select one of the available
-        options
-      </Text>
-
-      <Text>
-        <Color magenta>{figures.pointerSmall}</Color> Use the{' '}
-        <Color cyan>SPACE</Color> key to select the clients to remove
-      </Text>
-
-      <Divider padding={0} width={70} />
-    </Box>
+    </BaseScreen>
   );
 };

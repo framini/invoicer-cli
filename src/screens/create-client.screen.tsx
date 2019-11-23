@@ -10,6 +10,9 @@ import {
 } from '../models/client.model';
 import { FormField, getField } from '../components/form-field';
 import { Divider } from '../components/divider';
+import { GoBackMessage, Notes } from '../components/messages';
+import { BaseScreen } from './base.screen';
+import { Title } from '../components/title';
 
 const ClientProvider = ({
   provider,
@@ -127,26 +130,22 @@ export const CreateClientScreen = ({
   );
 
   return (
-    <>
-      <Box paddingTop={1} flexDirection="column">
-        <Text bold>
-          <Color magenta>Creating a client:</Color>
-        </Text>
-        {isInitialSetup && (
-          <>
-            <Text italic>A client represents the target of our invoice.</Text>
-            <Text italic>
-              For now we'll create one but you can create as many as needed
-            </Text>
-          </>
-        )}
-        <Box paddingTop={1}>
-          <Text italic bold>
-            Note: You can cancel by pressing <Color cyan>ESC</Color>
-          </Text>
-        </Box>
-      </Box>
-      <Divider padding={0} />
+    <BaseScreen
+      header={
+        <>
+          <Title>Creating a client:</Title>
+          {isInitialSetup && (
+            <Notes>
+              <Text italic>A client represents the target of our invoice.</Text>
+              <Text italic>
+                For now we'll create one but you can create as many as needed
+              </Text>
+            </Notes>
+          )}
+          {!isInitialSetup && <GoBackMessage />}
+        </>
+      }
+    >
       {field && (
         <Box paddingBottom={1}>
           <FormField
@@ -158,6 +157,6 @@ export const CreateClientScreen = ({
           />
         </Box>
       )}
-    </>
+    </BaseScreen>
   );
 };
