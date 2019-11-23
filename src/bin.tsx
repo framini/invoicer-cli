@@ -23,6 +23,7 @@ import {
 import { useKeyboardNav } from './hooks/use-keyboard-nav';
 import { Divider } from './components/divider';
 import { EditClientScreen } from './screens/edit-client.screen';
+import { RemoveClientScreen } from './screens/remove-client.screen';
 
 const App = () => {
   const { state, send, Route } = useRouter<
@@ -102,6 +103,10 @@ const App = () => {
 
       <Route section="edit-client">
         <EditClientScreen />
+      </Route>
+
+      <Route section="remove-client">
+        <RemoveClientScreen />
       </Route>
 
       <Route section="create-invoice">

@@ -1,6 +1,8 @@
 import React from 'react';
-import { Box, Color, useInput } from 'ink';
+import { Box, useInput, Color } from 'ink';
 import figures from 'figures';
+
+import { SelectItem, Item } from './item';
 
 const SelectIndicator = ({ isSelected }: { isSelected?: boolean }) => {
   return (
@@ -10,37 +12,21 @@ const SelectIndicator = ({ isSelected }: { isSelected?: boolean }) => {
   );
 };
 
-const SelectItem = ({
-  isSelected,
-  label
-}: {
-  isSelected?: boolean;
-  label: string;
-}) => {
-  return <Color cyan={isSelected}>{label}</Color>;
-};
-
-interface Item {
-  label: string;
-  value: React.Key;
-  key?: React.Key;
-}
-
 interface SelectInputProps {
   items: Item[];
   onSelect: (item: Item) => void;
   defaultIndex?: number;
-  selectedIndex?: number;
+  selected?: number;
 }
 
 export const SelectInput = (props: SelectInputProps) => {
-  const [selectedIndex, setSelectedIndex] = React.useState(
-    props.selectedIndex ?? 0
+  const [navigatedIndex, setNavigatedIndex] = React.useState(
+    props.selected ?? 0
   );
 
   useInput((input, key) => {
     if (key.downArrow) {
-      setSelectedIndex(si => {
+      setNavigatedIndex(si => {
         if (si >= props.items.length - 1) {
           return 0;
         }
@@ -48,7 +34,7 @@ export const SelectInput = (props: SelectInputProps) => {
         return si + 1;
       });
     } else if (key.upArrow) {
-      setSelectedIndex(si => {
+      setNavigatedIndex(si => {
         if (si === 0) {
           return props.items.length - 1;
         }
@@ -56,20 +42,20 @@ export const SelectInput = (props: SelectInputProps) => {
         return si - 1;
       });
     } else if (key.return) {
-      props.onSelect(props.items[selectedIndex]);
+      props.onSelect(props.items[navigatedIndex]);
     }
   });
 
   React.useEffect(() => {
-    if (props.selectedIndex && props.selectedIndex !== selectedIndex) {
-      setSelectedIndex(props.selectedIndex);
+    if (props.selected && props.selected !== navigatedIndex) {
+      setNavigatedIndex(props.selected);
     }
-  }, [props.selectedIndex, selectedIndex]);
+  }, [props.selected, navigatedIndex]);
 
   return (
     <Box flexDirection="column">
       {props.items.map((item, index) => {
-        const isSelected = index === selectedIndex;
+        const isSelected = index === navigatedIndex;
 
         return (
           <Box key={item.key || item.value}>

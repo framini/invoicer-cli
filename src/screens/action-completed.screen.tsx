@@ -35,9 +35,15 @@ export const ActionCompleted = ({
     <React.Fragment>
       <Box paddingTop={1} paddingBottom={1}>
         <Color green>{figures.tick}</Color>{' '}
-        <Text italic bold>
-          {entityName} created successfully!
-        </Text>
+        {entityName ? (
+          <Text italic bold>
+            {entityName} created successfully!
+          </Text>
+        ) : (
+          <Text italic bold>
+            action completed!
+          </Text>
+        )}
       </Box>
 
       <Divider padding={0} />

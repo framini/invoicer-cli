@@ -8,7 +8,7 @@ import figures from 'figures';
 import { Divider } from './divider';
 import { FormFieldValue } from '../types/types';
 import { colors } from '../config';
-import { SelectInput } from './select-input';
+import { SelectInput } from './select/select-input';
 
 interface FormFieldProps<T> {
   onSubmit: (s: string) => void;
@@ -176,7 +176,7 @@ export const FormField = <T extends any>({
         <SelectInput
           items={field.values}
           onSelect={item => onSubmit(item.value as string)}
-          selectedIndex={initialIndex}
+          selected={initialIndex}
         />
       </Box>
     );

@@ -12,6 +12,7 @@ type TopLevelRoutesState = {
   home: {};
   'manage-clients': {};
   'edit-client': {};
+  'remove-client': {};
   'create-client': {};
   'create-invoice': {};
   'action-completed': {};
@@ -61,7 +62,9 @@ export type TopLevelRoutesEvent =
   | { type: 'TOP_LEVEL.GO_TO'; payload: any }
   | { type: 'TO_MANAGE_CLIENTS'; payload: any }
   | { type: 'TO_EDIT_CLIENT'; payload: any }
-  | { type: 'EDIT_CLIENT.SELECT'; payload: any };
+  | { type: 'TO_REMOVE_CLIENT'; payload: any }
+  | { type: 'EDIT_CLIENT.SELECT'; payload: any }
+  | { type: 'REMOVE_CLIENT.COMMIT'; payload: any };
 
 export const topLevelRoutesMachine = Machine<
   TopLevelRoutesContext,
@@ -201,6 +204,13 @@ export const topLevelRoutesMachine = Machine<
           }
         }
       },
+      'remove-client': {
+        on: {
+          TO_HOME: {
+            target: 'home'
+          }
+        }
+      },
       'action-completed': {
         on: {
           TO_HOME: {
@@ -245,6 +255,10 @@ export const topLevelRoutesMachine = Machine<
       },
       'EDIT_CLIENT.SELECT': {
         actions: ['selectActiveId', 'sendNavigateTo', 'trackSelectedRoute']
+      },
+      'REMOVE_CLIENT.COMMIT': {
+        actions: ['removeClients', 'trackSelectedRoute'],
+        target: 'action-completed'
       }
     }
   },
@@ -268,6 +282,11 @@ export const topLevelRoutesMachine = Machine<
               value: 'edit-client',
               label: 'Edit Client',
               id: 'TO_EDIT_CLIENT'
+            },
+            {
+              value: 'remove-client',
+              label: 'Remove Client/s',
+              id: 'TO_REMOVE_CLIENT'
             }
           ]
         };
@@ -408,6 +427,22 @@ export const topLevelRoutesMachine = Machine<
             ref: spawn(baseInfoMachine.withContext(bi))
           };
         }
+      }),
+      removeClients: assign((ctx, event) => {
+        return {
+          clients: Object.keys(
+            ctx.clients
+          ).reduce((reducer, key) => {
+            // @ts-ignore
+            if (event.items.some(i => i.value === key)) {
+              return reducer;
+            }
+
+            reducer[key] = ctx.clients[key];
+
+            return reducer;
+          }, {} as Clients)
+        };
       }),
       // used when aborting a create process (client or invoice)
       discardEntity: assign((ctx, event) => {

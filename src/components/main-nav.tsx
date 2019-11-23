@@ -2,7 +2,7 @@ import React from 'react';
 import { Box } from 'ink';
 
 import { TopLevelRouteContext } from './top-level-route-context';
-import { SelectInput } from './select-input';
+import { SelectInput } from './select/select-input';
 
 export const MainNav = () => {
   const { state, send } = React.useContext(TopLevelRouteContext);
