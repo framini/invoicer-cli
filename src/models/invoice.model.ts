@@ -505,7 +505,7 @@ export const invoiceMachine = Machine<
 
         return {
           ...formattedData,
-          payment_method: paymentMethod,
+          paymentMethod,
           month: format(setMonth(new Date(), ctx.date), 'MMMM'),
           year: format(new Date(), 'yyyy')
         };

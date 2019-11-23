@@ -30,7 +30,7 @@ There are a couple of requirements in order to be able to run the tool:
   - `{{totalHours}}`
   - `{{hourlyRate}}`
   - `{{flatSalary}}`
-  - `{{payment_method}}`
+  - `{{paymentMethod}}`
   - `{{month}}`
   - `{{year}}`
 
