@@ -3,11 +3,8 @@ import { Box, Text, Color } from 'ink';
 import TextInput from 'ink-text-input';
 import Table from 'ink-table';
 import Spinner from 'ink-spinner';
-import figures from 'figures';
 
-import { Divider } from './divider';
 import { FormFieldValue } from '../types/types';
-import { colors } from '../config';
 import { SelectInput } from './select/select-input';
 
 interface FormFieldProps<T> {
@@ -130,18 +127,6 @@ const getTableContent = (tableItem: any) => {
   return [tableItem];
 };
 
-const ErrorMessage = ({ message }: { message: string }) => {
-  return (
-    <>
-      <Divider padding={0} dividerColor={colors.red} width={60} />
-      <Text bold>
-        <Color hex={colors.red}>{figures.cross}</Color> {message}
-      </Text>
-      <Divider padding={0} dividerColor={colors.red} width={60} />
-    </>
-  );
-};
-
 const getPlaceholder = ({ context, field }: { context: any; field: any }) => {
   if (context[field.value]) {
     return context[field.value];
@@ -150,35 +135,64 @@ const getPlaceholder = ({ context, field }: { context: any; field: any }) => {
   return context[field.defaultValue];
 };
 
+const InputField = ({ placeholder, field, onSubmit }: any) => {
+  const [value, setValue] = React.useState('');
+
+  return (
+    <Box>
+      <Text>
+        {field.label}
+        {field.required && <Color red>*</Color>}:{' '}
+      </Text>
+      <TextInput
+        placeholder={placeholder}
+        value={value}
+        onChange={value => {
+          setValue(value);
+        }}
+        onSubmit={value => {
+          // TODO: we might want to show the user some feedback?
+          if (!value && !placeholder && field.required) {
+            return;
+          }
+
+          setValue('');
+          onSubmit(value || placeholder);
+        }}
+      />
+    </Box>
+  );
+};
+
+const SelectField = ({ field, value, onSubmit }: any) => {
+  const index = field.values.findIndex((item: any) => item.value === value);
+  const initialIndex = index > -1 ? index : 0;
+
+  return (
+    <Box flexDirection="column">
+      <Text>{field.label}:</Text>
+      <SelectInput
+        key={`${field.label}${initialIndex}`}
+        items={field.values}
+        onSelect={item => onSubmit(item.value as string)}
+        selected={initialIndex}
+      />
+    </Box>
+  );
+};
+
 export const FormField = <T extends any>({
   onSubmit,
   field,
   context
 }: FormFieldProps<T>) => {
-  const [value, setValue] = React.useState('');
-
   if (field.kind === 'select-input') {
     const value = getPlaceholder({
       context,
       field
     });
 
-    const index = field.values.findIndex(item => item.value === value);
-    const initialIndex = index > -1 ? index : 0;
-    // @ts-ignore
-    const error = context[field.errorSrc];
-
-    return (
-      <Box flexDirection="column">
-        <Text>{field.label}:</Text>
-        {error && <ErrorMessage message={error} />}
-        <SelectInput
-          items={field.values}
-          onSelect={item => onSubmit(item.value as string)}
-          selected={initialIndex}
-        />
-      </Box>
-    );
+    return <SelectField value={value} onSubmit={onSubmit} field={field} />;
   } else if (field.kind === 'table') {
     const data = parseTableData(field.columns, context);
 
@@ -232,35 +246,12 @@ export const FormField = <T extends any>({
     );
   }
 
-  // @ts-ignore
-  // const placeholder = context[field.value];
   const placeholder = getPlaceholder({
     context,
     field
   });
 
   return (
-    <Box>
-      <Text>
-        {field.label}
-        {field.required && <Color red>*</Color>}:{' '}
-      </Text>
-      <TextInput
-        placeholder={placeholder}
-        value={value}
-        onChange={value => {
-          setValue(value);
-        }}
-        onSubmit={value => {
-          // TODO: we might want to show the user some feedback?
-          if (!value && !placeholder && field.required) {
-            return;
-          }
-
-          setValue('');
-          onSubmit(value || placeholder);
-        }}
-      />
-    </Box>
+    <InputField placeholder={placeholder} onSubmit={onSubmit} field={field} />
   );
 };

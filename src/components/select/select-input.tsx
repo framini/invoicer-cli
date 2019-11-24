@@ -20,9 +20,7 @@ interface SelectInputProps {
 }
 
 export const SelectInput = (props: SelectInputProps) => {
-  const [navigatedIndex, setNavigatedIndex] = React.useState(
-    props.selected ?? 0
-  );
+  const [navigatedIndex, setNavigatedIndex] = React.useState(props.selected ?? 0);
 
   useInput((input, key) => {
     if (key.downArrow) {
@@ -45,12 +43,6 @@ export const SelectInput = (props: SelectInputProps) => {
       props.onSelect(props.items[navigatedIndex]);
     }
   });
-
-  React.useEffect(() => {
-    if (props.selected && props.selected !== navigatedIndex) {
-      setNavigatedIndex(props.selected);
-    }
-  }, [props.selected, navigatedIndex]);
 
   return (
     <Box flexDirection="column">

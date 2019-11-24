@@ -39,9 +39,6 @@ export const BaseInfoScreen = ({
     state.value
   );
 
-  // @ts-ignore
-  const value = state.context[state.value];
-
   return (
     <BaseScreen
       header={
@@ -79,7 +76,6 @@ export const BaseInfoScreen = ({
           onSubmit={value => {
             send('BASE_INFO.NEXT', { key: state.value, value });
           }}
-          value={value}
         />
       )}
     </BaseScreen>

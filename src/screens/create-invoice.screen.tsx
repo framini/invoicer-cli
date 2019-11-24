@@ -26,9 +26,6 @@ export const CreateInvoiceScreen = ({ invoice }: { invoice: any }) => {
     state.value
   );
 
-  // @ts-ignore
-  const value = state.context[state.value];
-
   return (
     <BaseScreen
       header={
@@ -47,7 +44,6 @@ export const CreateInvoiceScreen = ({ invoice }: { invoice: any }) => {
           onSubmit={value => {
             send('INVOICE.NEXT', { key: state.value, value });
           }}
-          value={value}
         />
       )}
     </BaseScreen>
