@@ -395,11 +395,24 @@ export const harvestProviderMachine = Machine<
         const formattedEntries = Object.keys(ctx.entries).map(projectName => {
           return {
             'Project Name': projectName,
-            'Hourly Rate': hourlyRate,
+            'Hourly Rate': parseFloat(
+              new Decimal(hourlyRate).toFixed(2, Decimal.ROUND_HALF_UP)
+            ),
             Hours: parseFloat(ctx.entries[projectName]), // hours
-            'Amount US$': hourlyRate * parseFloat(ctx.entries[projectName]) // $ amount = rate * hours,
+            'Amount US$': parseFloat(
+              new Decimal(
+                hourlyRate * parseFloat(ctx.entries[projectName])
+              ).toFixed(2, Decimal.ROUND_HALF_UP)
+            ) // $ amount = rate * hours,
           };
         });
+
+        const formatedHourlyRate =
+          ctx.typeOfContract === 'flat_salary'
+            ? parseFloat(
+                new Decimal(hourlyRate).toFixed(2, Decimal.ROUND_HALF_UP)
+              )
+            : ctx.hourly_rate;
 
         // we'll only include `totalHours` for `flat_salary` since for
         // `hourly_rate` we don't need to fill in that field
@@ -413,7 +426,7 @@ export const harvestProviderMachine = Machine<
         return {
           ...totalHoursProp,
           report: formattedEntries,
-          hourlyRate,
+          hourlyRate: formatedHourlyRate,
           flatSalary
         };
       }
