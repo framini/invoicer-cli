@@ -3,9 +3,13 @@ import { Box, Text, Color } from 'ink';
 import TextInput from 'ink-text-input';
 import Table from 'ink-table';
 import Spinner from 'ink-spinner';
+import figures from 'figures';
 
 import { FormFieldValue } from '../types/types';
 import { SelectInput } from './select/select-input';
+import { Divider } from './divider';
+import { colors } from '../config';
+
 
 interface FormFieldProps<T> {
   onSubmit: (s: string) => void;
@@ -135,6 +139,19 @@ const getPlaceholder = ({ context, field }: { context: any; field: any }) => {
   return context[field.defaultValue];
 };
 
+const ErrorMessage = ({ message }: { message: string }) => {
+  return (
+    <>
+      <Divider padding={0} dividerColor={colors.red} width={60} />
+      <Text bold>
+        <Color hex={colors.red}>{figures.cross}</Color> {message}
+      </Text>
+      <Divider padding={0} dividerColor={colors.red} width={60} />
+    </>
+  );
+};
+
+
 const InputField = ({ placeholder, field, onSubmit }: any) => {
   const [value, setValue] = React.useState('');
 
@@ -164,13 +181,14 @@ const InputField = ({ placeholder, field, onSubmit }: any) => {
   );
 };
 
-const SelectField = ({ field, value, onSubmit }: any) => {
+const SelectField = ({ field, value, onSubmit, error }: any) => {
   const index = field.values.findIndex((item: any) => item.value === value);
   const initialIndex = index > -1 ? index : 0;
 
   return (
     <Box flexDirection="column">
       <Text>{field.label}:</Text>
+      {error && <ErrorMessage message={error} />}
       <SelectInput
         key={`${field.label}${initialIndex}`}
         items={field.values}
@@ -192,7 +210,10 @@ export const FormField = <T extends any>({
       field
     });
 
-    return <SelectField value={value} onSubmit={onSubmit} field={field} />;
+    // @ts-ignore
+    const error = context[field.errorSrc];
+
+    return <SelectField value={value} onSubmit={onSubmit} field={field} error={error} />;
   } else if (field.kind === 'table') {
     const data = parseTableData(field.columns, context);
 
