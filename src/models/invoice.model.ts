@@ -519,6 +519,7 @@ export const invoiceMachine = Machine<
         // original shape to preview the data in previous steps.
         const data = {
           ...ctx.formatted,
+          fullName: `${ctx.baseInfo.firstname} ${ctx.baseInfo.lastname}`,
           report: ctx.formatted.report.map((item: any) =>
             Object.keys(item).map(i => item[i])
           )

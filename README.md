@@ -24,8 +24,9 @@ yarn global add invoicer-cli
 
 ## Usage
 There are a couple of requirements in order to be able to run the tool:
-- **`template.xlsx`**: This is a normal Excel file that's gonna serve as the base template for the invoice. You can put anything you want in there, from formulas to custom styles. We'll keep everything as it is and *only* replace the parts you told us to. This file should exist at the root of the `process.cwd()` (Current Working Directory)
+- **`template.xlsx`**: This is a normal Excel file that's gonna serve as the base template for the invoice (you could see the example file [template.xlsx](template.xlsx) for some inspiration). You can put anything you want in there, from formulas to custom styles. We'll keep everything as it is and *only* replace the parts you told us to. This file should exist at the root of the `process.cwd()` (Current Working Directory)
 - **Template variables**: The part to be replaced within `template.xlsx` are placeholders we're gonna be replacing with the data for the specified month. Here's the list of supported variables:
+  - `{{fullName}}`
   - `{{report}}`
   - `{{totalHours}}`
   - `{{hourlyRate}}`
@@ -42,6 +43,14 @@ By placing any of the values above within your `template.xlsx` we'll take care o
 
 ## Connecting with Harvest
 In order to be able to connect with `Harvest` you'll have to create a `Personal Access Token` in [here](https://id.getharvest.com/developers). There are 2 pieces of interest, the `Account ID` and the `Token`, you'll need both. If your are interested in reading more info about it and why we need this: [link](https://help.getharvest.com/api-v2/authentication-api/authentication/authentication/#personal-access-tokens)
+
+## Development
+
+By running:
+
+`yarn dev`
+
+You'll get to expirement with the attached `template.xlsx` file.
 
 ## License
 
