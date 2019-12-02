@@ -396,13 +396,13 @@ export const harvestProviderMachine = Machine<
           return {
             'Project Name': projectName,
             'Hourly Rate': parseFloat(
-              new Decimal(hourlyRate).toFixed(2, Decimal.ROUND_HALF_UP)
+              new Decimal(hourlyRate).toFixed(3, Decimal.ROUND_HALF_UP)
             ),
             Hours: parseFloat(ctx.entries[projectName]), // hours
             'Amount US$': parseFloat(
               new Decimal(
                 hourlyRate * parseFloat(ctx.entries[projectName])
-              ).toFixed(2, Decimal.ROUND_HALF_UP)
+              ).toFixed(3, Decimal.ROUND_HALF_UP)
             ) // $ amount = rate * hours,
           };
         });
