@@ -7,7 +7,8 @@
 ## Quick Start
 1. Get the `Personal Access Token` and `Account ID` [from harvest](https://help.getharvest.com/api-v2/authentication-api/authentication/authentication/#personal-access-tokens).
 1. Download [template.xlsx](template.xlsx) and place it on any folder you want. There's nothing special about this file, it just shows you how you could use the different template variables available.
-1. From within that same folder, run: `npx invoicer-cli`.
+1. Install the package: `npm install -g @framini/invoicer-cli`
+1. From within that same folder, run: `inv`.
 1. Follow the steps.
 
 ## Features
@@ -17,16 +18,16 @@
 ## Install
 
 ```bash
-npx invoicer-cli
+npm install -g @framini/invoicer-cli
 ```
 
 or
 
 ```bash
-yarn global add invoicer-cli
+yarn global add @framini/invoicer-cli
 ```
 
-> Exposes two global commands (the same), `inv` and `@framini/invoicer-cli`.
+> Exposes two global commands (the same), `inv` and `invv`.
 
 ## Usage
 There are a couple of requirements in order to be able to run the tool:
