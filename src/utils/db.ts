@@ -20,5 +20,6 @@ const serialize = (value: any) =>
   );
 
 export const db = new Conf({
-  serialize
+  serialize,
+  projectName: 'invoicer-cli'
 });
