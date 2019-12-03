@@ -4,6 +4,12 @@
 ## Overview
 `Invoicer` is a command line tool to help you generate invoices by just following a small set of steps. Absolutely nothing will leave your computer so feel free to experiment with it. Meaning, everything you do stays local in your computer (within the [user config directory](https://github.com/sindresorhus/env-paths#pathsconfig)) and nothing is sent to the outside at any point.
 
+## Quick Start
+1. Get the `Personal Access Token` and `Account ID` [from harvest](https://help.getharvest.com/api-v2/authentication-api/authentication/authentication/#personal-access-tokens).
+1. Download [template.xlsx](template.xlsx) and place it on any folder you want. There's nothing special about this file, it just shows you how you could use the different template variables available.
+1. From within that same folder, run: `npx invoicer-cli`.
+1. Follow the steps.
+
 ## Features
 - **Harvest report:** Connect to your `Harvest` account and fetch the hours report for a specific date.
 - **Flat salary/Hourly rate**: Depending on your contract, you can pick among a couple of different options, including `Flat Salary` and `Hourly Rate`. If you are lucky and don't have to provide a detailed hours report you can also use `Fixed Rate`.
