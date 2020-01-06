@@ -10,7 +10,8 @@ import { FormFields } from '../types/types';
 type InvoiceMachineState = {
   client: {};
   payment: {};
-  date: {};
+  month: {};
+  retry_month: {};
   calculating: {};
   format: {};
   retry_calculating: {};
@@ -46,10 +47,11 @@ type InvoiceMachineFields = FormFields<
     InvoiceMachineState,
     | 'payment'
     | 'client'
-    | 'date'
+    | 'month'
     | 'calculating'
     | 'check_dependencies'
     | 'review'
+    | 'retry_month'
     | 'retry_generate'
     | 'retry_calculating'
     | 'retry_check_dependencies'
@@ -99,7 +101,7 @@ export const createInvoice = () => {
         // This will look up for ctx.clients. It expects an object
         src: 'clients'
       },
-      date: {
+      month: {
         label: 'Pick a month',
         values: [
           {
@@ -192,6 +194,21 @@ export const createInvoice = () => {
         ],
         kind: 'select-input'
       },
+      retry_month: {
+        label:
+          'It seems that there are no entries for that period. Do you want to select another month?',
+        values: [
+          {
+            label: 'Yes',
+            value: 'yes'
+          },
+          {
+            label: 'No',
+            value: 'no'
+          }
+        ],
+        kind: 'select-input'
+      },
       retry_calculating: {
         label:
           'Something went wrong while making the math. Feeling lucky and want to retry?',
@@ -248,12 +265,12 @@ export const invoiceMachine = Machine<
       payment: {
         on: {
           'INVOICE.NEXT': {
-            target: 'date',
+            target: 'month',
             actions: ['updateContextKey']
           }
         }
       },
-      date: {
+      month: {
         invoke: {
           src: 'getDefaultDate',
           onDone: {
@@ -267,13 +284,35 @@ export const invoiceMachine = Machine<
           }
         }
       },
+      retry_month: {
+        on: {
+          'INVOICE.NEXT': [
+            {
+              target: 'month',
+              cond: 'shouldRetry'
+            },
+            {
+              target: 'failure',
+              actions: 'sendInvoiceDiscard',
+              cond: 'shouldAbortRetry'
+            }
+          ]
+        }
+      },
       calculating: {
         entry: ['sendProviderCalculateRequest'],
         on: {
-          'PROVIDER.CALCULATE_SUCCESS': {
-            target: 'format',
-            actions: ['onCalculateSuccess']
-          },
+          'PROVIDER.CALCULATE_SUCCESS': [
+            {
+              target: 'format',
+              cond: 'readyToFormat',
+              actions: ['onCalculateSuccess']
+            },
+            {
+              target: 'retry_month',
+              cond: 'noEntriesFound'
+            }
+          ],
           'PROVIDER.CALCULATE_FAILURE': {
             target: 'retry_calculating',
             actions: ['onCalculateFail']
@@ -420,7 +459,7 @@ export const invoiceMachine = Machine<
       sendProviderCalculateRequest: send(
         (ctx: any) => ({
           type: 'PROVIDER.CALCULATE',
-          payload: { date: ctx.date }
+          payload: { month: ctx.month }
         }),
         { to: ctx => ctx.providerRef }
       ),
@@ -506,7 +545,7 @@ export const invoiceMachine = Machine<
         return {
           ...formattedData,
           paymentMethod,
-          month: format(setMonth(new Date(), ctx.date), 'MMMM'),
+          month: format(setMonth(new Date(), ctx.month), 'MMMM'),
           year: format(new Date(), 'yyyy')
         };
       },
@@ -566,6 +605,26 @@ export const invoiceMachine = Machine<
       },
       shouldRetry: (ctx: InvoiceMachineContext, event: any) => {
         return event.value === 'yes';
+      },
+      readyToFormat: (ctx: any, event: any) => {
+        const data = event.payload?.data;
+
+        if (data && (data.totalHours > 0 || Object.keys(data.report).length)) {
+          return true;
+        }
+
+        return false;
+      },
+      // TODO: find if there's another way of doing this. we're pretty
+      // much re-writing something because I can't negate a guard.
+      noEntriesFound: (ctx: any, event: any) => {
+        const data = event.payload?.data;
+
+        if (data && Object.keys(data.report).length === 0) {
+          return true;
+        }
+
+        return false;
       }
     }
   }

@@ -335,11 +335,11 @@ export const harvestProviderMachine = Machine<
         const { payload } = event;
 
         const from = format(
-          new Date(getYear(new Date()), payload.date),
+          new Date(getYear(new Date()), payload.month),
           'yyyy-MM-dd'
         );
         const to = format(
-          endOfMonth(new Date(getYear(new Date()), payload.date, 1)),
+          endOfMonth(new Date(getYear(new Date()), payload.month, 1)),
           'yyyy-MM-dd'
         );
 
@@ -357,7 +357,7 @@ export const harvestProviderMachine = Machine<
 
           const month = new Date(b.spent_date).getMonth();
 
-          if (month == payload.date) {
+          if (month == payload.month) {
             reducer[b.client.name] += new Decimal(b.hours)
               .mul(60)
               .toNearest(6, Decimal.ROUND_UP)
@@ -377,6 +377,15 @@ export const harvestProviderMachine = Machine<
         }, {} as any);
       },
       formatEntries: async (ctx: any) => {
+        if (Object.keys(ctx.entries).length === 0) {
+          return {
+            totalHours: 0,
+            report: {},
+            hourlyRate: undefined,
+            flatSalary: undefined,
+          }
+        }
+
         const totalHours = Object.keys(ctx.entries).reduce(
           (reducer, projectName) => {
             return reducer + parseFloat(ctx.entries[projectName]);
