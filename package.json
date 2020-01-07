@@ -1,7 +1,7 @@
 {
   "name": "@framini/invoicer-cli",
   "description": "Terminal assistant for generating invoices",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "author": {
     "name": "Francisco Ramini",
     "email": "framini@gmail.com"
