@@ -10,7 +10,6 @@ import { SelectInput } from './select/select-input';
 import { Divider } from './divider';
 import { colors } from '../config';
 
-
 interface FormFieldProps<T> {
   onSubmit: (s: string) => void;
   field: FormFieldValue;
@@ -151,7 +150,6 @@ const ErrorMessage = ({ message }: { message: string }) => {
   );
 };
 
-
 const InputField = ({ placeholder, field, onSubmit }: any) => {
   const [value, setValue] = React.useState('');
 
@@ -213,7 +211,14 @@ export const FormField = <T extends any>({
     // @ts-ignore
     const error = context[field.errorSrc];
 
-    return <SelectField value={value} onSubmit={onSubmit} field={field} error={error} />;
+    return (
+      <SelectField
+        value={value}
+        onSubmit={onSubmit}
+        field={field}
+        error={error}
+      />
+    );
   } else if (field.kind === 'table') {
     const data = parseTableData(field.columns, context);
 
@@ -233,12 +238,8 @@ export const FormField = <T extends any>({
         />
       </Box>
     );
-  } else if (field.kind === 'select-input-dynamic') {
+  } else if (field.kind === 'select-input-dynamic' && context[field.src]) {
     const src = context[field.src];
-
-    if (!src) {
-      return null;
-    }
 
     const items = Object.keys(src).map(key => {
       return {
@@ -256,7 +257,10 @@ export const FormField = <T extends any>({
         />
       </Box>
     );
-  } else if (field.kind === 'loading') {
+  } else if (
+    field.kind === 'loading' ||
+    (field.kind === 'select-input-dynamic' && !context[field.src])
+  ) {
     return (
       <Box>
         <Color green>

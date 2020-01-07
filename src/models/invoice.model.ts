@@ -1,15 +1,34 @@
 import cuid from 'cuid';
 import { Machine, assign, sendParent, send } from 'xstate';
-import { subMonths, format, isBefore, setDate, setMonth } from 'date-fns';
+import {
+  subMonths,
+  format,
+  isBefore,
+  setDate,
+  setMonth,
+  getYear,
+  getMonth
+} from 'date-fns';
 
 import { toXlsx, checkRequiredVariables } from '../utils/xlsx';
 import * as config from '../config';
 import { fileExists } from '../utils/fs';
 import { FormFields } from '../types/types';
 
+// Number of previous years to display while selecting the year for
+// the invoice
+const MAX_PREV_YEARS = 5;
+
+// Number of days within a month to recommened the previous month as
+// the default one for emitting an invoice.
+// Example: any day until the 15 of Feb will default to Jan while any
+// day after that will default to Feb
+const MAX_DAYS_WITHIN_MONTH = 15;
+
 type InvoiceMachineState = {
   client: {};
   payment: {};
+  year: {};
   month: {};
   retry_month: {};
   calculating: {};
@@ -101,6 +120,11 @@ export const createInvoice = () => {
         // This will look up for ctx.clients. It expects an object
         src: 'clients'
       },
+      year: {
+        label: 'Pick a year',
+        kind: 'select-input-dynamic',
+        src: 'available_years'
+      },
       month: {
         label: 'Pick a month',
         values: [
@@ -154,7 +178,7 @@ export const createInvoice = () => {
           }
         ],
         kind: 'select-input',
-        defaultValue: 'recommended_date'
+        defaultValue: 'recommended_month'
       },
       calculating: {
         kind: 'loading',
@@ -263,6 +287,20 @@ export const invoiceMachine = Machine<
         }
       },
       payment: {
+        on: {
+          'INVOICE.NEXT': {
+            target: 'year',
+            actions: ['updateContextKey']
+          }
+        }
+      },
+      year: {
+        invoke: {
+          src: 'getAvailableYears',
+          onDone: {
+            actions: 'updateAvailableYears'
+          }
+        },
         on: {
           'INVOICE.NEXT': {
             target: 'month',
@@ -441,7 +479,10 @@ export const invoiceMachine = Machine<
         };
       }),
       updateRecommendedDate: assign({
-        recommended_date: (context: any, event: any) => event.data
+        recommended_month: (context: any, event: any) => event.data
+      }),
+      updateAvailableYears: assign({
+        available_years: (context: any, event: any) => event.data
       }),
       updateEntries: assign({
         entries: (context: any, event: any) => event.data
@@ -459,7 +500,7 @@ export const invoiceMachine = Machine<
       sendProviderCalculateRequest: send(
         (ctx: any) => ({
           type: 'PROVIDER.CALCULATE',
-          payload: { month: ctx.month }
+          payload: { month: ctx.month, year: ctx.year }
         }),
         { to: ctx => ctx.providerRef }
       ),
@@ -499,16 +540,29 @@ export const invoiceMachine = Machine<
       })
     },
     services: {
-      getDefaultDate: () => {
+      getAvailableYears: async () => {
+        const currentYear = getYear(new Date());
+
+        return [...Array(MAX_PREV_YEARS).keys()].reduce((reducer, _, index) => {
+          reducer.push({
+            id: `${currentYear - index}`,
+            name: `${currentYear - index}`
+          });
+
+          return reducer;
+        }, [] as any);
+      },
+      getDefaultDate: async () => {
         const today = new Date();
-        // we'll use the 5th of each month
-        const limitWithinMonth = setDate(new Date(), 5);
+        // we'll use the ${MAX_DAYS_WITHIN_MONTH}th of each month
+        const limitWithinMonth = setDate(new Date(), MAX_DAYS_WITHIN_MONTH);
 
         let defaultMonth;
 
-        // if `today` is within the limit of each month, we'll assume
-        // we're trying to invoice the last month
-        if (isBefore(today, limitWithinMonth)) {
+        // if `today` is within the limit of each month AND we're not
+        // at the beginning of the year, we'll assume we're trying to invoice the
+        // last month
+        if (isBefore(today, limitWithinMonth) && getMonth(today) > 0) {
           defaultMonth = format(subMonths(today, 1), 'M');
         } else {
           defaultMonth = format(today, 'M');
@@ -517,7 +571,7 @@ export const invoiceMachine = Machine<
         const parsedMonth = parseInt(defaultMonth, 10);
 
         // Months are zero based index (from 0 to 11)
-        return Promise.resolve(`${parsedMonth - 1}`);
+        return `${parsedMonth - 1}`;
       },
       formatEntries: async (ctx: any) => {
         const paymentMethodField = ctx.fields.payment.values.find(
@@ -546,7 +600,7 @@ export const invoiceMachine = Machine<
           ...formattedData,
           paymentMethod,
           month: format(setMonth(new Date(), ctx.month), 'MMMM'),
-          year: format(new Date(), 'yyyy')
+          year: ctx.year
         };
       },
       generateInvoice: async (ctx: any) => {

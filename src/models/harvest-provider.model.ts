@@ -1,6 +1,6 @@
 import { Machine, assign, sendParent } from 'xstate';
 import Decimal from 'decimal.js';
-import { format, endOfMonth, getYear } from 'date-fns';
+import { format, endOfMonth } from 'date-fns';
 
 import { api } from '../utils/api';
 import { FormFields } from '../types/types';
@@ -335,11 +335,11 @@ export const harvestProviderMachine = Machine<
         const { payload } = event;
 
         const from = format(
-          new Date(getYear(new Date()), payload.month),
+          new Date(payload.year, payload.month),
           'yyyy-MM-dd'
         );
         const to = format(
-          endOfMonth(new Date(getYear(new Date()), payload.month, 1)),
+          endOfMonth(new Date(payload.year, payload.month, 1)),
           'yyyy-MM-dd'
         );
 
