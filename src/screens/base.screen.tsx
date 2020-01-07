@@ -2,11 +2,13 @@ import React from 'react';
 import { Box } from 'ink';
 
 import { Divider } from '../components/divider';
+import { UpdateNotifier } from '../components/update-notifier';
 
 interface BaseScreenProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   header?: React.ReactNode;
+  checkUpdateAvailable?: boolean
 }
 
 export const BaseScreen = (props: BaseScreenProps) => {
@@ -36,6 +38,8 @@ export const BaseScreen = (props: BaseScreenProps) => {
           <Divider padding={0} width={70} />
         </Box>
       )}
+
+      {props.checkUpdateAvailable && <UpdateNotifier />}
     </Box>
   );
 };

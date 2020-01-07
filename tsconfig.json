@@ -6,13 +6,14 @@
     "noUnusedLocals": true,
     "noFallthroughCasesInSwitch": true,
     "strict": true,
-    "rootDir": "src",
+    // "rootDir": "src",
     "outDir": "dist",
     "sourceMap": true,
     "lib": ["dom", "es2017", "esnext.asynciterable"],
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "jsx": "react"
+    "jsx": "react",
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
